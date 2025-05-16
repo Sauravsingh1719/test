@@ -3,29 +3,67 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
-
 export async function POST(req: Request) {
-    const {name, email, password, username, phoneNumber} = await req.json();
+    try {
+        const { name, email, password, username, phoneNumber } = await req.json();
 
-    if(!name || !email || !password || !username) {
-        return NextResponse.json({message: "Please fill all the fields"}, {status: 400});
+        // Input validation
+        if (!name || !email || !password || !username) {
+            return NextResponse.json(
+                { message: "All required fields must be filled" },
+                { status: 400 }
+            );
+        }
+
+        await dbConnect();
+
+        // Check for existing user
+        const existingUser = await User.findOne({ 
+            $or: [
+                { email: email.toLowerCase() },
+                { username: username.toLowerCase() }
+            ]
+        });
+
+        if (existingUser) {
+            return NextResponse.json(
+                { message: "Username or email already exists" },
+                { status: 409 }
+            );
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        // Create user
+        const user = await User.create({
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            password: passwordHash,
+            username: username.toLowerCase().trim(),
+            phoneNumber: phoneNumber?.trim(),
+            role: "student"
+        });
+
+        // Return sanitized user data
+        return NextResponse.json(
+            { 
+                message: "Account created successfully",
+                user: { 
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    username: user.username
+                }
+            },
+            { status: 201 }
+        );
+
+    } catch (error) {
+        console.error("Signup error:", error);
+        return NextResponse.json(
+            { message: "Server error, please try again later" },
+            { status: 500 }
+        );
     }
-
-    await dbConnect();
-
-    const existingUser = await User.findOne({ $or: [{email}, {username}] });
-    if(existingUser) {
-        return NextResponse.json({message: "User already exists"}, {status: 400});
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({
-        name,
-        email,
-        password: passwordHash,
-        username,
-        phoneNumber,
-        role: "student"
-    });
-    return NextResponse.json({ user: { id: user._id, role: user.role } }, { status: 201 });
 }

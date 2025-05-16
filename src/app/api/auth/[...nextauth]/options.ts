@@ -14,6 +14,27 @@ export const authOptions: NextAuthOptions = {
                 password: { label: 'Password', type: 'password' }
             },
             async authorize(credentials: any): Promise<any> {
+
+                const { identifier, password } = credentials;
+
+                        const adminEmail = process.env.ADMIN_EMAIL;
+                        const adminPassword = process.env.ADMIN_PASSWORD;
+
+                        
+                        if (
+                            identifier === adminEmail &&
+                            password === adminPassword
+                        ) {
+                            return {
+                                _id: 'admin-id',
+                                name: 'Admin',
+                                email: adminEmail,
+                                role: 'admin',
+                                username: 'admin'
+                            };
+                        }
+
+
                 await dbConnect();
                 try {
                     const user = await User.findOne({
@@ -34,7 +55,7 @@ export const authOptions: NextAuthOptions = {
 
                     return {
                         _id: user._id,
-                        name: user.Name,
+                        name: user.name,
                         email: user.email,
                         username: user.username,
                         role: user.role
