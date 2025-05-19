@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
   }
 
-  // Role‐based guards
+ 
   if (token) {
     if (url.pathname.startsWith('/admin') && role !== 'admin') {
       return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));

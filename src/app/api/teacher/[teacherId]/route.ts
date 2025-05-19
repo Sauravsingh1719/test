@@ -6,11 +6,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { teacherId: string } }
 ) {
   await dbConnect();
   const token = await getToken({ req: request });
-  const userId = params.userId;
+  const teacherId = await params.teacherId;
 
   if (!token || (token.role !== "admin" && token.role !== "teacher")) {
     return NextResponse.json(
@@ -20,14 +20,14 @@ export async function GET(
   }
 
 
-  if (token.role === "teacher" && token.sub !== userId) {
+  if (token.role === "teacher" && token.sub !== teacherId) {
     return NextResponse.json(
       { success: false, message: "Access denied" },
       { status: 403 }
     );
   }
 
-  const teacher = await User.findById(userId).select("-password");
+  const teacher = await User.findById(teacherId).select("-password");
 
   if (!teacher || teacher.role !== "teacher") {
     return NextResponse.json(
@@ -41,11 +41,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { teacherId: string } }
 ) {
   await dbConnect();
   const token = await getToken({ req: request });
-  const userId = params.userId;
+  const teacherId = params.teacherId;
 
   if (!token || (token.role !== "admin" && token.role !== "teacher")) {
     return NextResponse.json(
@@ -55,7 +55,7 @@ export async function PUT(
   }
 
  
-  if (token.role === "teacher" && token.sub !== userId) {
+  if (token.role === "teacher" && token.sub !== teacherId) {
     return NextResponse.json(
       { success: false, message: "Access denied" },
       { status: 403 }
@@ -63,7 +63,7 @@ export async function PUT(
   }
 
   const { password, phoneNumber } = await request.json();
-  const teacher = await User.findById(userId).select("+password");
+  const teacher = await User.findById(teacherId).select("+password");
 
   if (!teacher) {
     return NextResponse.json(
@@ -91,11 +91,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { teacherId: string } }
 ) {
   await dbConnect();
   const token = await getToken({ req: request });
-  const userId = params.userId;
+  const teacherId = params.teacherId;
 
   if (!token || (token.role !== "admin" && token.role !== "teacher")) {
     return NextResponse.json(
@@ -105,14 +105,14 @@ export async function DELETE(
   }
 
   
-  if (token.role === "teacher" && token.sub !== userId) {
+  if (token.role === "teacher" && token.sub !== teacherId) {
     return NextResponse.json(
       { success: false, message: "Access denied" },
       { status: 403 }
     );
   }
 
-  const teacher = await User.findById(userId);
+  const teacher = await User.findById(teacherId);
   if (!teacher) {
     return NextResponse.json(
       { success: false, message: "Teacher not found" },

@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigationItems = [
-    { label: 'Home', href: '#' },
-    { label: 'About', href: '#' },
-    { label: 'Plans', href: '#' },
-    { label: 'Faq', href: '#' },
-    { label: 'Contact', href: '#' },
+    { label: 'Home', href: '/admin' },
+    { label: 'Teacher', href: '/admin/teacher' },
+    { label: 'Students', href: '/admin/students' },
+    { label: 'Category', href: '/admin/category' },
+    { label: 'Tests', href: '/admin/tests' },
   ];
 
   return (
@@ -21,7 +21,7 @@ const Sidebar = () => {
         initial={{ x: 0 }}
       >
         <h1 className="font-extrabold text-4xl mb-8">LOGO</h1>
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col gap-4 py-10">
           {navigationItems.map(item => (
             <li key={item.label}>
               <Button className="w-full text-left">{item.label}</Button>

@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({message:"Already exists"})
     }
 
-    const passwordHash = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 12)
     const user = await User.create({
         name, 
         email,
         username,
         phoneNumber,
-        passwordHash,
+        password: hashedPassword,
         role: 'teacher'
     });
 

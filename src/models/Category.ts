@@ -37,6 +37,5 @@ const CategorySchema = new mongoose.Schema({
 
 CategorySchema.index({ createdBy: 1 });
 CategorySchema.index({ 'subcategories._id': 1 });
-CategorySchema.index({ name: 1 }, { unique: true });
 
 export default mongoose.models.Category || mongoose.model('Category', CategorySchema);

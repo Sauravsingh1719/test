@@ -23,46 +23,39 @@ export async function GET(){
 }
 
 export async function POST(request: NextRequest) {
-        try{
-            await dbConnect();
-            const token = await getToken({req: request});
-            if(!token || !isAuthorized(token.role)){
-                return NextResponse.json({
-                    success: false,
-                    message: "Unauthorized"
-                },{status: 400});
-            }
+  try {
+    await dbConnect();
 
-            const {name, description, subcategories} = await request.json();
-            
-            if(!name){
-                return NextResponse.json({
-                    success: false,
-                    error: 'Category name required'
-                }, {status: 400});
-            }
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET
+    });
+    if (!token || !isAuthorized(token.role)) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
 
-            const newCategory = await Category.create({
-                name,
-                description,
-                subcategories: subcategories?.map((sub: any) => ({
-                    ...sub,
-                    createdBy: token.sub
-                })),
-                createdBy: token.sub
-            })
+    const { name, description, subcategories = [] } = await request.json();
+    if (!name.trim()) {
+      return NextResponse.json({ success: false, error: "Category name required" }, { status: 400 });
+    }
 
-            return NextResponse.json({
-                success: true, data: newCategory
-            }, {status:201})
-        }catch(error: any) {
-            if(error.code === 11000) {
-                return NextResponse.json({
-                    success: false, error: 'Category Name already exists'
-                }, {status:409});
-            }
-            return NextResponse.json({
-                success: false, error: 'Category creation failed'
-            }, {status:500})
-        }  
+    const newCategory = await Category.create({
+      name,
+      description,
+      subcategories: subcategories.map((sub: any) => ({
+        ...sub,
+        createdBy: token._id!
+      })),
+      createdBy: token._id!
+    });
+
+    return NextResponse.json({ success: true, data: newCategory }, { status: 201 });
+  } catch (error: any) {
+    console.error("POST /api/categories error:", error);
+    if (error.code === 11000) {
+      return NextResponse.json({ success: false, error: "Category already exists" }, { status: 409 });
+    }
+    return NextResponse.json({ success: false, error: "Category creation failed" }, { status: 500 });
+  }
 }
+

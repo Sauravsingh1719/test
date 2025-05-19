@@ -78,7 +78,7 @@ export default function StudentsTable() {
         {students.map((student, index) => (
           <TableRow key={student._id}>
             <TableCell className="font-medium">{index + 1}</TableCell>
-            <TableCell>{student.name}</TableCell>
+            <TableCell><a href={`/admin/students/${student._id}`}>{student.name}</a></TableCell>
             <TableCell>{student.username}</TableCell>
             <TableCell>{student.email}</TableCell>
             <TableCell>{student.phoneNumber || '-'}</TableCell>

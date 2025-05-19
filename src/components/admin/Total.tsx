@@ -51,6 +51,7 @@ const Total = () => {
             <div className="text-2xl font-bold">{stats.totalTests}</div>
           </CardContent>
         </Card>
+        <a href='/admin/teacher'>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Teachers</CardTitle>
@@ -59,6 +60,7 @@ const Total = () => {
             <div className="text-2xl font-bold">{stats.totalTeachers}</div>
           </CardContent>
         </Card>
+        </a>
         <a href='/admin/students'>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -69,6 +71,7 @@ const Total = () => {
           </CardContent>
         </Card>
         </a>
+        <a href='/admin/category'>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Categories</CardTitle>
@@ -77,6 +80,7 @@ const Total = () => {
             <div className="text-2xl font-bold">{stats.totalCategories}</div>
           </CardContent>
         </Card>
+        </a>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Subcategories</CardTitle>
