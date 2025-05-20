@@ -3,14 +3,18 @@ import bcrypt from "bcryptjs";
 import dbConnect from "@/app/lib/dbConnect";
 
 const UserSchema = new mongoose.Schema({
-  username:     { type: String, required: true, unique: true },
-  password:     { type: String, required: true, select: false },
-  email:        { type: String, required: true, unique: true },
-  name:         { type: String, required: true },
-  phoneNumber:  { type: String },
-  role:         { type: String, enum: ["admin","student","teacher"], default: "student" },
-  createdAt:    { type: Date, default: Date.now },
-});
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  phoneNumber: String,
+  role: { 
+    type: String, 
+    required: true, 
+    enum: ['admin', 'teacher', 'student'], 
+    default: 'student'
+  },
+}, { timestamps: true });
 
 
 UserSchema.index({ username: 1, email: 1 }, { unique: true });
@@ -40,7 +44,7 @@ async function createAdminUser() {
     await User.create({
       username:   "admin",
       email:      process.env.ADMIN_EMAIL,
-      password: await bcrypt.hash(process.env.ADMIN_PASSWORD, 10),    
+      password: process.env.ADMIN_PASSWORD,    
       name:       "System Admin",
       role:       "admin",
       phoneNumber:""

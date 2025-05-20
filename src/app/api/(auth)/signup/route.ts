@@ -32,20 +32,16 @@ export async function POST(req: Request) {
             );
         }
 
-        // Hash password
-        const passwordHash = await bcrypt.hash(password, 12);
-
-        // Create user
         const user = await User.create({
-            name: name.trim(),
-            email: email.toLowerCase().trim(),
-            password: passwordHash,
-            username: username.toLowerCase().trim(),
-            phoneNumber: phoneNumber?.trim(),
-            role: "student"
-        });
+                name:       name.trim(),
+                email:      email.toLowerCase().trim(),
+                password,                      // ← pass raw password here
+                username: username.toLowerCase().trim(),
+                phoneNumber: phoneNumber?.trim(),
+                role: "student"
+            });
 
-        // Return sanitized user data
+       
         return NextResponse.json(
             { 
                 message: "Account created successfully",

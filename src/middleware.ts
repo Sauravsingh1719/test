@@ -27,19 +27,19 @@ export async function middleware(request: NextRequest) {
       url.pathname === '/'
     )  // ← closed this parenthesis
   ) {
-    return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
+    return NextResponse.redirect(new URL(`/${role}`, request.url));
   }
 
- 
+  // Role‐based guards
   if (token) {
     if (url.pathname.startsWith('/admin') && role !== 'admin') {
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
+      return NextResponse.redirect(new URL(`/${role}`, request.url));
     }
     if (url.pathname.startsWith('/teacher') && role !== 'teacher') {
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
+      return NextResponse.redirect(new URL(`/${role}`, request.url));
     }
     if (url.pathname.startsWith('/student') && role !== 'student') {
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
+      return NextResponse.redirect(new URL(`/${role}`, request.url));
     }
   }
 

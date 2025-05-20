@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { signIn } from 'next-auth/react'
+import { getSession, signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Button from '@/components/button'
@@ -60,21 +60,31 @@ export default function AuthTabs() {
   })
 
   const handleSignIn = async (data: SignInFormData) => {
-    setError('')
-    const result = await signIn('credentials', {
-      redirect: false,
-      ...data,
-    })
+  setError('');
+  const result = await signIn('credentials', {
+    redirect: false,
+    ...data,
+  });
 
-    if (result?.error) {
-      setError('Invalid credentials')
+  if (result?.error) {
+    setError('Invalid credentials');
+  } else {
+   
+    const session = await getSession();
+    const role = session?.user?.role;
+    
+    
+    if (role) {
+      router.push(`/${role}`);
     } else {
-      // redirect to admin for now; you can change based on role via getSession()
-      router.push('/admin')
+      router.push('/');
     }
   }
+}
 
   const handleSignUp = async (data: SignUpFormData) => {
+    const session = await getSession();
+    const role = session?.user?.role || 'student';
     try {
       const response = await fetch('/api/signup', {
         method: 'POST',
@@ -95,7 +105,7 @@ export default function AuthTabs() {
         identifier: data.email,
         password: data.password,
       })
-      router.push('/admin')
+      router.push(`/${role}`);
     } catch (err: any) {
       setTabError(err.message)
     }
