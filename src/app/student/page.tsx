@@ -2,6 +2,7 @@ import Carousel from '@/components/student/Carousel'
 import { getServerSession } from 'next-auth';
 import React from 'react'
 import { authOptions } from '../api/auth/[...nextauth]/options';
+import Category from '@/components/Category';
 
 
 export default async function Page() { // Made the component async
@@ -20,6 +21,9 @@ export default async function Page() { // Made the component async
       </div>
       <div className='py-4 flex text-center justify-center'>
         <h1 className='font-extrabold text-8xl text-gray-300'>Ready for a new Challenge ? </h1>
+      </div>
+      <div>
+        <Category />
       </div>
     </div>
   )

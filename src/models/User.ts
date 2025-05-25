@@ -40,16 +40,19 @@ const User = mongoose.models.User || mongoose.model("User", UserSchema);
 async function createAdminUser() {
   await dbConnect();
   const existing = await User.findOne({ role: "admin" });
+  
   if (!existing && process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
-    await User.create({
-      username:   "admin",
-      email:      process.env.ADMIN_EMAIL,
-      password: process.env.ADMIN_PASSWORD,    
-      name:       "System Admin",
-      role:       "admin",
-      phoneNumber:""
+    const admin = await User.create({
+      username: "admin",
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+      name: "System Admin",
+      role: "admin",
+      phoneNumber: ""
     });
-    console.log("✅ Admin user created");
+    
+    console.log("✅ Admin user created with ID:", admin._id);
+    return admin;
   }
 }
 

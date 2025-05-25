@@ -1,3 +1,4 @@
+
 import Dashboard from '@/components/admin/Dashboard'
 import Profile from '@/components/profile'
 import React from 'react'
@@ -11,6 +12,7 @@ const page = () => {
       <div>
         <Dashboard />
       </div>
+     
     </div>
   )
 }

@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from 'bcryptjs';
 
 
+
 export const authOptions: NextAuthOptions = {
 
     
@@ -24,18 +25,21 @@ export const authOptions: NextAuthOptions = {
                         const adminPassword = process.env.ADMIN_PASSWORD;
 
                         
-                        if (
-                            identifier === adminEmail &&
-                            password === adminPassword
-                        ) {
-                            return {
-                                _id: 'admin-id',
-                                name: 'Admin',
-                                email: adminEmail,
-                                role: 'admin',
-                                username: 'admin'
-                            };
-                        }
+                        if (identifier === adminEmail && password === adminPassword) {
+                                const adminUser = await User.findOne({ role: 'admin' });
+                                
+                                if (!adminUser) {
+                                    throw new Error('Admin user not found');
+                                }
+
+                                return {
+                                    _id: adminUser._id,  
+                                    name: adminUser.name,
+                                    email: adminUser.email,
+                                    role: adminUser.role,
+                                    username: adminUser.username
+                                };
+                                }
 
 
                 await dbConnect();

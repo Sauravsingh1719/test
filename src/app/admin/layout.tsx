@@ -1,8 +1,10 @@
+
 import React from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import Navbar from '@/components/admin/Navbar';
 import { BreadcrumbWithCustomSeparator } from '@/components/braedcrumb';
 import Profile from '@/components/profile';
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Profile />
         </div>
         {children}
+      
       </main>
     </div>
   );

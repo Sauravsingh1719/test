@@ -22,6 +22,7 @@ export default function CreateCategoryPage() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [subcategories, setSubcategories] = useState<string[]>(['']);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,11 +36,17 @@ export default function CreateCategoryPage() {
     }
 
     try {
-      const res = await axios.post(
-        '/api/categories',
-        { name, description },
-        { withCredentials: true }
-      );
+      const payload = {
+        name,
+        description,
+        subcategories: subcategories
+          .filter((sub) => sub.trim() !== '')
+          .map((sub) => ({ name: sub.trim() })),
+      };
+
+      const res = await axios.post('/api/categories', payload, {
+        withCredentials: true,
+      });
 
       if (res.status === 201 && res.data.success) {
         toast.success('Category created');
@@ -64,7 +71,8 @@ export default function CreateCategoryPage() {
         </CardHeader>
 
         <CardContent>
-          <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="category-form" onSubmit={handleSubmit} className="space-y-6">
+            {/* Category Name */}
             <div>
               <Label htmlFor="cat-name">Name</Label>
               <Input
@@ -74,6 +82,8 @@ export default function CreateCategoryPage() {
                 placeholder="Ex: Science"
               />
             </div>
+
+            {/* Category Description */}
             <div>
               <Label htmlFor="cat-desc">Description</Label>
               <Input
@@ -82,6 +92,43 @@ export default function CreateCategoryPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Optional short description"
               />
+            </div>
+
+            {/* Subcategories */}
+            <div>
+              <Label>Subcategories</Label>
+              {subcategories.map((sub, idx) => (
+                <div key={idx} className="flex items-center gap-2 mt-2">
+                  <Input
+                    value={sub}
+                    onChange={(e) => {
+                      const updated = [...subcategories];
+                      updated[idx] = e.target.value;
+                      setSubcategories(updated);
+                    }}
+                    placeholder={`Subcategory ${idx + 1}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() =>
+                      setSubcategories((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                  >
+                    X
+                  </Button>
+                </div>
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4"
+                onClick={() => setSubcategories((prev) => [...prev, ''])}
+              >
+                + Add Subcategory
+              </Button>
             </div>
           </form>
         </CardContent>

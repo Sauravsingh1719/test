@@ -1,5 +1,6 @@
 import dbConnect from "@/app/lib/dbConnect";
 import Category from "@/models/Category";
+import mongoose from "mongoose";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -44,9 +45,9 @@ export async function POST(request: NextRequest) {
       description,
       subcategories: subcategories.map((sub: any) => ({
         ...sub,
-        createdBy: token._id!
+        createdBy: new mongoose.Types.ObjectId(token._id) 
       })),
-      createdBy: token._id!
+      createdBy: new mongoose.Types.ObjectId(token._id)
     });
 
     return NextResponse.json({ success: true, data: newCategory }, { status: 201 });

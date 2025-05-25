@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -81,7 +80,13 @@ export default function CategoriesTable() {
                 </a>
               </TableCell>
               <TableCell>{cat.description || '—'}</TableCell>
-              <TableCell>{cat.subcategories}</TableCell>
+              <TableCell>
+                    {cat.subcategories.map((sub, i) => (
+                      <span key={sub._id}>
+                        {sub.name}{i < cat.subcategories.length - 1 ? ', ' : ''}
+                      </span>
+                    ))}
+                  </TableCell>
               <TableCell className="text-right">
                 {new Date(cat.createdAt).toLocaleDateString()}
               </TableCell>

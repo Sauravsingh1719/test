@@ -1,6 +1,5 @@
 import dbConnect from "@/app/lib/dbConnect";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -40,13 +39,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({message:"Already exists"})
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    
     const user = await User.create({
         name, 
         email,
         username,
         phoneNumber,
-        password: hashedPassword,
+        password,
         role: 'teacher'
     });
 

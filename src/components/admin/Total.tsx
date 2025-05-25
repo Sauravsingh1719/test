@@ -81,6 +81,7 @@ const Total = () => {
           </CardContent>
         </Card>
         </a>
+        <a href='/admin/category/subcategories'>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Subcategories</CardTitle>
@@ -89,6 +90,7 @@ const Total = () => {
             <div className="text-2xl font-bold">{stats.totalSubcategories}</div>
           </CardContent>
         </Card>
+        </a>
       </div>
     </div>
   );
