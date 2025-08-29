@@ -1,9 +1,15 @@
 import React from 'react'
 import Total from './Total'
+import TestCreate from '../Testcreate'
+import StudentTestList from '../student/TestList'
 
 const Dashboard = () => {
   return (
-    <div><Total/></div>
+    <div>
+      <div><Total/></div>
+      <div><TestCreate/></div>
+      <div><StudentTestList/></div>
+    </div>
   )
 }
 

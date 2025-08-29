@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import React from 'react'
 import { authOptions } from '../api/auth/[...nextauth]/options';
 import Category from '@/components/Category';
+import StudentTestList from '@/components/student/TestList';
 
 
 export default async function Page() { // Made the component async
@@ -25,6 +26,10 @@ export default async function Page() { // Made the component async
       <div>
         <Category />
       </div>
+      <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Available Tests</h1>
+      <StudentTestList />
+    </div>
     </div>
   )
 }

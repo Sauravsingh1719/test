@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: { category
     try {
       await dbConnect();
       const token = await getToken({ req: request });
-      const categoryId = params.categoryId;
+      const categoryId = await params.categoryId;
   
       if (!token || (token.role !== "admin" && token.role !== "teacher")) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, {params}:{params: {categoryId: s
         try {
             await dbConnect();
             const token = await getToken({req: request});
-            const categoryId = params.categoryId;
+            const categoryId = await params.categoryId;
 
             if(!token || (token.role !=='admin' && token.role !== 'teacher')) {
                 return NextResponse.json(
@@ -94,7 +94,7 @@ export async function DELETE(request: NextRequest, {params}: {params: {categoryI
     try{
         await dbConnect();
         const token = await getToken({req: request});
-        const categoryId = params.categoryId;
+        const categoryId = await params.categoryId;
 
         if(!token || token.role !== 'admin'){
             return NextResponse.json({
