@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
       url.pathname.startsWith('/sign-in') ||
       url.pathname.startsWith('/sign-up') ||
       url.pathname === '/'
-    )  // ← closed this parenthesis
+    )  
   ) {
     return NextResponse.redirect(new URL(`/${role}`, request.url));
   }

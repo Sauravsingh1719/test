@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-    if (!token || (token.role !== "admin" && token.role !== "teacher" )) {
+    if (!token || (token.role !== "admin" && token.role !== "teacher" && token.role !== "student")) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 

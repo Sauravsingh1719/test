@@ -39,15 +39,25 @@ export default function StudentTestTake({ testId }: { testId: string }) {
           setError(res.data?.error || "Failed to load test");
         }
       } catch (err: any) {
-        console.error(err);
-        setError(err?.message || "Network error");
+        console.error("Error loading test:", err);
+
+       
+        const status = err?.response?.status;
+        if (status === 401) {
+          
+          
+          router.push(`/sign-in`);
+          return;
+        }
+
+        setError(err?.response?.data?.error || err?.message || "Network error");
       } finally {
         if (mounted) setLoading(false);
       }
     }
     load();
     return () => { mounted = false; if (timerRef.current) clearInterval(timerRef.current); };
-  }, [testId]);
+  }, [testId, router]);
 
   // timer
   useEffect(() => {
@@ -103,18 +113,21 @@ export default function StudentTestTake({ testId }: { testId: string }) {
           timerRef.current = null;
         }
       } else {
-        if (res.data?.error && res.data.error.toLowerCase().includes("unauthorized")) {
+        if (res.data?.error && res.data.error.toLowerCase().includes("unauthorized") ) {
           if (confirm("You must be logged in to submit. Go to login page?")) {
-            router.push("/auth/signin");
+            const callback = encodeURIComponent(`/test/${testId}`);
+            router.push(`/auth/signin?callbackUrl=${callback}`);
           }
         } else {
           setError(res.data?.error || "Submission failed");
         }
       }
     } catch (err: any) {
-      console.error(err);
+      console.error("Submit error:", err);
       if (err.response?.status === 401) {
-        if (confirm("You must be logged in. Go to sign-in?")) router.push("/auth/signin");
+        // Redirect to signin if not authenticated
+        const callback = encodeURIComponent(`/test/${testId}`);
+        router.push(`/auth/signin?callbackUrl=${callback}`);
         return;
       }
       setError(err?.response?.data?.error || err?.message || "Network error");
@@ -129,6 +142,7 @@ export default function StudentTestTake({ testId }: { testId: string }) {
 
   // If we have a result, show summary and button to get detailed result
   if (result) {
+    const resultId = result.resultId || result.result_id || result._id || result.result || result.id;
     return (
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="p-4 border rounded">
@@ -144,7 +158,7 @@ export default function StudentTestTake({ testId }: { testId: string }) {
             className="btn"
             onClick={() => {
               // navigate to detailed result page when user chooses
-              router.push(`/test/result/${result.resultId || result.result_id || result.resultid || result.result}`); // try common keys
+              if (resultId) router.push(`/test/result/${resultId}`);
             }}
           >
             Get detailed result
