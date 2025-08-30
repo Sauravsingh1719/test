@@ -4,6 +4,7 @@ import Button from './button'
 
 function Hero() {
   return (
+    <div className='px-[13%]'>
     <div className=" flex flex-col md:flex-row gap-8 md:gap-20 items-center justify-center px-6 md:px-[10%] min-h-screen">
       {/* Image - show first on small, last on md+ */}
       <div className="w-full md:w-auto flex justify-center order-first md:order-last">
@@ -35,6 +36,7 @@ function Hero() {
           </a>
         </div>
       </div>
+    </div>
     </div>
   )
 }

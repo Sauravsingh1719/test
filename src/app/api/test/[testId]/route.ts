@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const testId = params.testId;
+    const testId = await params.testId;
     if (!mongoose.isValidObjectId(testId)) {
       return NextResponse.json({ success: false, error: "Invalid test id" }, { status: 400 });
     }

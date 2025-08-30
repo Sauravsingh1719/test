@@ -1,5 +1,9 @@
+import TestifyPass from '@/components/Fifth'
+import Fourth from '@/components/Fourth'
 import Hero from '@/components/Hero'
+
 import StudentTestList from '@/components/student/TestList'
+import Third from '@/components/Third'
 import React from 'react'
 
 const page = () => {
@@ -13,6 +17,15 @@ const page = () => {
         <div className='py-4'>
           <StudentTestList />
         </div>
+      </div>
+      <div>
+        <Third />
+      </div>
+      <div>
+        <Fourth/>
+      </div>
+      <div>
+        <TestifyPass />
       </div>
       
     </div>
