@@ -8,7 +8,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className='w-full h-screen bg-blue-200'>
+    <div className='w-full bg-blue-200'>
       <Hero />
       <div className='px-[20%] bg-blue-200'>
         <div className='pb-10'>
@@ -24,7 +24,7 @@ const page = () => {
       <div>
         <Fourth/>
       </div>
-      <div>
+      <div className='pb-[8%]'>
         <TestifyPass />
       </div>
       

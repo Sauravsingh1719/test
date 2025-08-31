@@ -170,7 +170,7 @@ export default function StudentTestTake({ testId }: { testId: string }) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-3xl mx-auto space-y-4 py-[8%]">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{test.title}</h2>
         <div className="text-sm">Time left: {timeLeft !== null ? formatTime(timeLeft) : "--:--"}</div>

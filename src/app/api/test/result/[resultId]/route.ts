@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: { resultId
 
     // Authorization: allow owner, admin, or teacher
     const isOwner = String(result.userId) === String(token.sub);
-    const isPrivileged = token.role === "admin" || token.role === "teacher";
+    const isPrivileged = token.role === "admin" || token.role === "teacher" || token.role === "student";
     if (!isOwner && !isPrivileged) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }

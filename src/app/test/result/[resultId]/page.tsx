@@ -7,7 +7,7 @@ export default function Page({ params }: Props) {
   const { resultId } = params;
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 py-[10%]">
       <ResultDetail resultId={resultId} />
     </div>
   );

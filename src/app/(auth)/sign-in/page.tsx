@@ -112,8 +112,8 @@ export default function AuthTabs() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 shadow-lg rounded-lg overflow-hidden bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-blue-200 px-4">
+      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 shadow-xl rounded-xl overflow-hidden bg-white">
         {/* Left image panel */}
         <div className="hidden md:block">
           {activeTab === 'signin' ? (
