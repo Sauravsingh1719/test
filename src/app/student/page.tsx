@@ -21,7 +21,7 @@ export default async function Page() { // Made the component async
         <Carousel />
       </div>
       <div className='py-4 flex text-center justify-center'>
-        <h1 className='font-extrabold text-8xl text-gray-300'>Ready for a new Challenge ? </h1>
+        <h1 className='font-extrabold text-5xl text-gray-300'>Ready for a new Challenge ? </h1>
       </div>
       <div>
         <Category />
