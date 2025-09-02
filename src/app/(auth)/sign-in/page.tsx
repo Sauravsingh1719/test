@@ -119,7 +119,7 @@ export default function AuthTabs() {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <BookOpen className="h-8 w-8" />
-              <span className="text-2xl font-bold">EduPlatform</span>
+              <span className="text-2xl font-bold">Testify</span>
             </div>
             <h2 className="text-3xl font-bold mb-4">Welcome to Student Portal</h2>
             <p className="text-blue-100">
