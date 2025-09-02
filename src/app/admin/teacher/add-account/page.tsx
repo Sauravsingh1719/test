@@ -1,10 +1,8 @@
 'use client';
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
-
 import {
   Card,
   CardHeader,
@@ -16,23 +14,57 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+interface Category {
+  _id: string;
+  name: string;
+}
 
 export default function CreateTeacherPage() {
   const router = useRouter();
 
-  const [name, setName]         = useState('');
+  const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const [email, setEmail]       = useState('');
-  const [phone, setPhone]       = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const [loading, setLoading]   = useState(false);
+  useEffect(() => {
+    async function loadCategories() {
+      setLoadingCategories(true);
+      try {
+        const res = await axios.get("/api/categories");
+        if (res.data?.success) {
+          setCategories(res.data.data || []);
+        } else {
+          toast.error("Failed to load categories");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Network error while loading categories");
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+    loadCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!name || !username || !email || !phone || !password) {
+    if (!name || !username || !email || !phone || !password || !category) {
       toast.error('All fields are required');
       setLoading(false);
       return;
@@ -41,7 +73,7 @@ export default function CreateTeacherPage() {
     try {
       const res = await axios.post(
         '/api/teacher',
-        { name, username, email, phoneNumber: phone, password },
+        { name, username, email, phoneNumber: phone, password, category },
         { withCredentials: true }
       );
 
@@ -75,6 +107,7 @@ export default function CreateTeacherPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Full name"
+                required
               />
             </div>
             <div>
@@ -84,6 +117,7 @@ export default function CreateTeacherPage() {
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 placeholder="Unique username"
+                required
               />
             </div>
             <div>
@@ -94,6 +128,7 @@ export default function CreateTeacherPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="teacher@example.com"
+                required
               />
             </div>
             <div>
@@ -103,6 +138,7 @@ export default function CreateTeacherPage() {
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="+1 555 123 4567"
+                required
               />
             </div>
             <div>
@@ -113,7 +149,27 @@ export default function CreateTeacherPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Strong password"
+                required
               />
+            </div>
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <Select value={category} onValueChange={setCategory} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {loadingCategories ? (
+                    <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                  ) : (
+                    categories.map((cat) => (
+                      <SelectItem key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
           </form>
         </CardContent>
@@ -123,7 +179,7 @@ export default function CreateTeacherPage() {
             form="create-teacher-form"
             variant="default"
             className="w-full"
-            disabled={loading}
+            disabled={loading || loadingCategories}
           >
             {loading ? 'Creating…' : 'Create Teacher'}
           </Button>

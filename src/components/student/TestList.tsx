@@ -10,7 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Button from "../button";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Clock, User, BookOpen, AlertCircle, Folder, Calendar } from "lucide-react";
 
 type TestSummary = {
   _id: string;
@@ -20,6 +23,7 @@ type TestSummary = {
   category?: { name: string };
   createdBy?: { name: string };
   marks?: { correct: number; wrong: number; unanswered: number };
+  createdAt?: string;
 };
 
 export default function StudentTestList() {
@@ -52,88 +56,126 @@ export default function StudentTestList() {
   }, []);
 
   if (loading) {
-    // grid of skeleton cards
     return (
-      <div aria-live="polite" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-[5%]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="p-4 border rounded-lg shadow-sm animate-pulse bg-white"
-            aria-hidden
-          >
-            <div className="h-6 bg-gray-200 rounded w-3/4 mb-3" />
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
-            <div className="h-12 bg-gray-100 rounded mb-3" />
-            <div className="flex justify-between items-center">
-              <div className="h-8 bg-gray-200 rounded w-20" />
-              <div className="h-8 bg-gray-200 rounded w-20" />
-            </div>
-          </div>
+          <Card key={i} className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <div className="flex gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            </CardHeader>
+            <CardContent className="pb-3">
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-2/3" />
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-9 w-24" />
+            </CardFooter>
+          </Card>
         ))}
       </div>
     );
   }
 
-  if (error)
+  if (error) {
     return (
-      <div role="alert" className="text-red-600">
-        {error}
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="text-lg font-medium mb-2">Unable to load tests</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
       </div>
     );
+  }
 
-  if (!tests || tests.length === 0)
-    return <div className="text-muted-foreground">No tests available right now.</div>;
+  if (!tests || tests.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium mb-2">No tests available</h3>
+        <p className="text-muted-foreground">Check back later for new tests</p>
+      </div>
+    );
+  }
 
   return (
-    <div className=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {tests.map((t) => (
-        <Card
-          key={t._id}
-          className="transition-transform hover:-translate-y-1 hover:shadow-lg border-blue-400 shadow-2xl bg-blue-50"
-        >
-          <CardHeader>
-            <div className="flex justify-between items-start gap-3">
-              <div>
-                <CardTitle className="text-lg line-clamp-2">
-                  <Link href={`/test/${t._id}`} className="hover:underline">
-                    {t.title}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
+      {tests.map((test) => (
+        <Card key={test._id} className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md">
+          <CardHeader className="pb-3">
+            <div className="flex justify-between items-start gap-2">
+              <div className="space-y-1">
+                <CardTitle className="text-lg line-clamp-2 leading-tight">
+                  <Link 
+                    href={`/test/${test._id}`} 
+                    className="hover:text-primary transition-colors"
+                  >
+                    {test.title}
                   </Link>
                 </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
-                  {t.category?.name ?? "General"} • {t.createdBy?.name ?? "Testify"}
-                </CardDescription>
+                <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
+                  {test.category?.name && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Folder className="h-3 w-3" />
+                      {test.category.name}
+                    </Badge>
+                  )}
+                  {test.createdBy?.name && (
+                    <span className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {test.createdBy.name}
+                    </span>
+                  )}
+                </div>
               </div>
-
-              <div className="text-xs font-medium px-2 py-1 rounded-md bg-slate-100">
-                {t.duration} min
-              </div>
+              <Badge variant="secondary" className="flex items-center gap-1 whitespace-nowrap">
+                <Clock className="h-3 w-3" />
+                {test.duration} min
+              </Badge>
             </div>
           </CardHeader>
 
-          <CardContent>
-            {t.description ? (
-              <p className="text-sm text-muted-foreground line-clamp-3">{t.description}</p>
+          <CardContent className="pb-3 flex-grow">
+            {test.description ? (
+              <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{test.description}</p>
             ) : (
-              <p className="text-sm text-muted-foreground">No description provided.</p>
+              <p className="text-sm text-muted-foreground italic mb-3">No description provided</p>
             )}
 
-            {t.marks && (
-              <div className="mt-3 text-xs text-muted-foreground">
-                <span className="mr-2">+{t.marks.correct}</span>
-                <span className="mr-2">wrong {t.marks.wrong}</span>
-                <span>unanswered {t.marks.unanswered}</span>
+            {test.marks && (
+              <div className="flex gap-4 text-xs text-muted-foreground">
+                <div className="flex flex-col">
+                  <span className="font-medium text-green-600">+{test.marks.correct}</span>
+                  <span>Correct</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-red-600">{test.marks.wrong}</span>
+                  <span>Wrong</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-600">{test.marks.unanswered}</span>
+                  <span>Unanswered</span>
+                </div>
               </div>
             )}
           </CardContent>
 
-          <CardFooter className="flex justify-between items-center">
-            <div className="text-xs text-muted-foreground">ID: {t._id.slice(0, 6)}</div>
-
-            <Link
-              href={`/test/${t._id}`}
-            >
-              <Button>Take test</Button>
-            </Link>
+          <CardFooter className="flex justify-between items-center pt-3 border-t">
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {test.createdAt ? new Date(test.createdAt).toLocaleDateString() : 'Recent'}
+            </div>
+            <Button asChild size="sm">
+              <Link href={`/test/${test._id}`}>
+                Take Test
+              </Link>
+            </Button>
           </CardFooter>
         </Card>
       ))}

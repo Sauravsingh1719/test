@@ -17,6 +17,11 @@ import Button from '@/components/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
+interface Category {
+  _id: string;
+  name: string;
+}
+
 interface Teacher {
   _id: string;
   name: string;
@@ -25,6 +30,7 @@ interface Teacher {
   phoneNumber?: string;
   role: string;
   createdAt: string;
+  category: Category; // Changed from string to Category object
 }
 
 export default function TeacherDetails() {
@@ -37,7 +43,6 @@ export default function TeacherDetails() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
 
- 
   useEffect(() => {
     const fetchTeacher = async () => {
       try {
@@ -59,7 +64,6 @@ export default function TeacherDetails() {
     fetchTeacher();
   }, [teacherId]);
 
-  // Update handler
   const handleUpdate = async () => {
     try {
       const res = await axios.put(
@@ -69,7 +73,6 @@ export default function TeacherDetails() {
       );
       if (res.status === 200) {
         toast.success('Teacher updated successfully.');
-        // reload this page to reflect changes
         router.push(`/admin/teacher/${teacherId}`);
       } else {
         toast.error(res.data.message || 'Unexpected response');
@@ -80,7 +83,6 @@ export default function TeacherDetails() {
     }
   };
 
- 
   const handleDelete = async () => {
     try {
       const res = await axios.delete(`/api/teacher/${teacherId}`, {
@@ -101,7 +103,7 @@ export default function TeacherDetails() {
   };
 
   if (loading) return <div><SkeletonCard /></div>;
-  if (error)   return <div>Error: {error}</div>;
+  if (error) return <div>Error: {error}</div>;
   if (!teacher) return <div>Teacher not found</div>;
 
   return (
@@ -112,6 +114,7 @@ export default function TeacherDetails() {
         <div>Username: {teacher.username}</div>
         <div>Email: {teacher.email}</div>
         <div>Phone: {teacher.phoneNumber || '-'}</div>
+        <div>Category: {teacher.category?.name || '-'}</div>
         <div>Joined: {new Date(teacher.createdAt).toLocaleDateString()}</div>
       </div>
 

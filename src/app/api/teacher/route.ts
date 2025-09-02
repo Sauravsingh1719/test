@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json ({error: 'unauthorized'}, {status:401})
     }
 
-    const {name, email, password, username, phoneNumber} = await request.json();
+    const {name, email, password, username, phoneNumber, category} = await request.json();
 
-    if(!name || !email || !username || !phoneNumber || !password ) {
+    if(!name || !email || !username || !phoneNumber || !password || !category) {
         return NextResponse.json({message: "Please fill all the fields"}, {status:400})
     }
 
@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
         username,
         phoneNumber,
         password,
-        role: 'teacher'
+        role: 'teacher',
+        category
     });
 
     return NextResponse.json({ user: { id: user._id, role: user.role } }, { status: 201 });

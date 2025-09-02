@@ -6,7 +6,7 @@ import Category from '@/components/Category';
 import StudentTestList from '@/components/student/TestList';
 
 
-export default async function Page() { // Made the component async
+export default async function Page() {
   const session = await getServerSession(authOptions);
   const name = session?.user?.name || 'Guest';
 

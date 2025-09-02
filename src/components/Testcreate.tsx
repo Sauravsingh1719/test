@@ -3,6 +3,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus, Trash2, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 type Question = {
   questionText: string;
@@ -19,14 +28,12 @@ export default function TestCreate() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  // form state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<string>("");
   const [description, setDescription] = useState("");
-  const [duration, setDuration] = useState<number>(20); // minutes
+  const [duration, setDuration] = useState<number>(20);
   const [marksCorrect, setMarksCorrect] = useState<number>(1);
-  const [marksWrong, setMarksWrong] = useState<number>(0); // teacher may put 1 or -1; server will normalize
+  const [marksWrong, setMarksWrong] = useState<number>(0);
   const [marksUnanswered, setMarksUnanswered] = useState<number>(0);
 
   const [questions, setQuestions] = useState<Question[]>([
@@ -51,10 +58,12 @@ export default function TestCreate() {
           if (res.data.data?.length) setCategory(res.data.data[0]._id);
         } else {
           setError("Failed to load categories");
+          toast.error("Failed to load categories");
         }
       } catch (err) {
         console.error(err);
         setError("Network error while loading categories");
+        toast.error("Network error while loading categories");
       } finally {
         setLoadingCategories(false);
       }
@@ -88,6 +97,10 @@ export default function TestCreate() {
   }
 
   function removeQuestion(index: number) {
+    if (questions.length <= 1) {
+      toast.error("A test must have at least one question");
+      return;
+    }
     setQuestions(prev => prev.filter((_, i) => i !== index));
   }
 
@@ -125,6 +138,7 @@ export default function TestCreate() {
     const vErr = validateForm();
     if (vErr) {
       setError(vErr);
+      toast.error(vErr);
       return;
     }
 
@@ -151,132 +165,218 @@ export default function TestCreate() {
       const res = await axios.post("/api/test", payload);
       if (res.data?.success) {
         setSuccessMsg("Test created successfully");
+        toast.success("Test created successfully");
         // small delay then redirect to tests list
         setTimeout(() => router.push("/admin/tests"), 900);
       } else {
         setError(res.data?.error || res.data?.message || "Creation failed");
+        toast.error(res.data?.error || res.data?.message || "Creation failed");
       }
     } catch (err: any) {
       console.error(err);
       const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Network/server error";
       setError(String(msg));
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Create Test</h2>
+    <div className="container max-w-4xl py-6 space-y-6">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h2 className="text-3xl font-bold tracking-tight">Create New Test</h2>
+      </div>
 
-      {error && <div className="mb-3 text-sm text-red-600 font-medium">{error}</div>}
-      {successMsg && <div className="mb-3 text-sm text-green-600 font-medium">{successMsg}</div>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-sm font-medium">Title</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} className="mt-1 input w-full" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Category</label>
-            {loadingCategories ? (
-              <div className="mt-1">Loading...</div>
-            ) : (
-              <select value={category} onChange={e => setCategory(e.target.value)} className="mt-1 input w-full">
-                <option value="">-- select category --</option>
-                {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-              </select>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Duration (minutes)</label>
-            <input type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} className="mt-1 input w-full" min={1} />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Description (optional)</label>
-          <textarea value={description} onChange={e => setDescription(e.target.value)} className="mt-1 textarea w-full" rows={3}></textarea>
-        </div>
-
-        <div className="p-3 border rounded">
-          <h4 className="font-semibold mb-2">Marks configuration</h4>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-sm">Correct (+)</label>
-              <input type="number" value={marksCorrect} onChange={e => setMarksCorrect(Number(e.target.value))} className="mt-1 input w-full" />
-              <p className="text-xs text-muted-foreground mt-1">Marks awarded for a correct answer.</p>
-            </div>
-            <div>
-              <label className="text-sm">Wrong (penalty)</label>
-              <input type="number" value={marksWrong} onChange={e => setMarksWrong(Number(e.target.value))} className="mt-1 input w-full" />
-              <p className="text-xs text-muted-foreground mt-1">Enter positive or negative. Server will treat as negative penalty.</p>
-            </div>
-            <div>
-              <label className="text-sm">Unanswered</label>
-              <input type="number" value={marksUnanswered} onChange={e => setMarksUnanswered(Number(e.target.value))} className="mt-1 input w-full" />
-              <p className="text-xs text-muted-foreground mt-1">Marks for unanswered question (usually 0).</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Questions */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="font-semibold">Questions ({questions.length})</h4>
-            <div className="flex gap-2">
-              <button type="button" onClick={addQuestion} className="btn-sm btn">+ Add question</button>
-              <button type="button" onClick={() => { if (confirm("Clear all questions?")) setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]); }} className="btn-ghost btn-sm">Clear</button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {questions.map((q, qi) => (
-              <div key={qi} className="p-3 border rounded">
-                <div className="flex justify-between items-start">
-                  <div className="font-medium">Q{qi + 1}</div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => removeQuestion(qi)} className="btn-ghost btn-sm">Remove</button>
-                  </div>
-                </div>
-
-                <div className="mt-2">
-                  <input value={q.questionText} onChange={e => updateQuestion(qi, { questionText: e.target.value })} placeholder="Question text" className="input w-full" />
-                </div>
-
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {q.options.map((opt, oi) => (
-                    <div key={oi} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name={`correct-${qi}`}
-                        checked={q.correctAnswer === oi}
-                        onChange={() => updateQuestion(qi, { correctAnswer: oi })}
-                      />
-                      <input value={opt} onChange={e => updateOption(qi, oi, e.target.value)} placeholder={`Option ${oi + 1}`} className="input w-full" />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-2">
-                  <input value={q.explanation} onChange={e => updateQuestion(qi, { explanation: e.target.value })} placeholder="Explanation (optional)" className="input w-full" />
-                </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Information</CardTitle>
+            <CardDescription>Provide basic information about your test</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="Enter test title"
+                />
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="flex gap-3">
-          <button type="submit" onClick={handleSubmit} disabled={submitting} className="btn">
-            {submitting ? "Creating..." : "Create Test"}
-          </button>
-          <button type="button" onClick={() => router.push("/admin/tests")} className="btn-ghost">Cancel</button>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                {loadingCategories ? (
+                  <div className="flex items-center justify-center h-10 border rounded-md">
+                    <span className="text-sm text-muted-foreground">Loading categories...</span>
+                  </div>
+                ) : (
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(c => (
+                        <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (optional)</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Describe what this test is about"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  value={duration}
+                  onChange={e => setDuration(Number(e.target.value))}
+                  min={1}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="marksCorrect">Marks for Correct Answer</Label>
+                <Input
+                  id="marksCorrect"
+                  type="number"
+                  value={marksCorrect}
+                  onChange={e => setMarksCorrect(Number(e.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="marksWrong">Marks for Wrong Answer</Label>
+                <Input
+                  id="marksWrong"
+                  type="number"
+                  value={marksWrong}
+                  onChange={e => setMarksWrong(Number(e.target.value))}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Questions</CardTitle>
+                <CardDescription>Add questions to your test ({questions.length})</CardDescription>
+              </div>
+              <Button type="button" onClick={addQuestion} className="gap-1">
+                <Plus className="h-4 w-4" /> Add Question
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {questions.map((q, qi) => (
+              <Card key={qi} className="relative">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg">Question {qi + 1}</CardTitle>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeQuestion(qi)}
+                      className="h-8 w-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`question-${qi}`}>Question Text</Label>
+                    <Input
+                      id={`question-${qi}`}
+                      value={q.questionText}
+                      onChange={e => updateQuestion(qi, { questionText: e.target.value })}
+                      placeholder="Enter your question here"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Options (select the correct answer)</Label>
+                    <RadioGroup
+                      value={q.correctAnswer.toString()}
+                      onValueChange={(value) => updateQuestion(qi, { correctAnswer: parseInt(value) })}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                    >
+                      {q.options.map((opt, oi) => (
+                        <div key={oi} className="flex items-center space-x-3 rounded-md border p-3">
+                          <RadioGroupItem value={oi.toString()} id={`option-${qi}-${oi}`} />
+                          <Input
+                            value={opt}
+                            onChange={e => updateOption(qi, oi, e.target.value)}
+                            placeholder={`Option ${oi + 1}`}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`explanation-${qi}`}>Explanation (optional)</Label>
+                    <Input
+                      id={`explanation-${qi}`}
+                      value={q.explanation}
+                      onChange={e => updateQuestion(qi, { explanation: e.target.value })}
+                      placeholder="Explain why this answer is correct"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </CardContent>
+        </Card>
+
+        <div className="flex gap-3 justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/tests")}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="min-w-32"
+          >
+            {submitting ? (
+              <>
+                <span className="animate-spin mr-2">⏳</span>
+                Creating...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Create Test
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </div>
   );
 }
- 

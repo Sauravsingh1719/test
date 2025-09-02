@@ -1,7 +1,4 @@
 import React from 'react';
-
-
-import Profile from '@/components/profile';
 import { BreadcrumbWithCustomSeparator } from '@/components/student/breadcrumb';
 
 
@@ -11,7 +8,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 p-6">
         <div className='py-5 flex justify-between'>
         <BreadcrumbWithCustomSeparator />
-        <Profile />
         </div>
         {children}
       </main>

@@ -14,6 +14,13 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'teacher', 'student'], 
     default: 'student'
   },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: function() {
+      return this.role === 'teacher';
+    }
+  }
 }, { timestamps: true });
 
 

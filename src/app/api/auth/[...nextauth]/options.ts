@@ -4,11 +4,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from 'bcryptjs';
 
-
-
 export const authOptions: NextAuthOptions = {
-
-    
     providers: [
         CredentialsProvider({
             id: 'credentials',
@@ -18,38 +14,39 @@ export const authOptions: NextAuthOptions = {
                 password: { label: 'Password', type: 'password' }
             },
             async authorize(credentials: any): Promise<any> {
-
                 const { identifier, password } = credentials;
 
-                        const adminEmail = process.env.ADMIN_EMAIL;
-                        const adminPassword = process.env.ADMIN_PASSWORD;
+                const adminEmail = process.env.ADMIN_EMAIL;
+                const adminPassword = process.env.ADMIN_PASSWORD;
 
-                        
-                        if (identifier === adminEmail && password === adminPassword) {
-                                const adminUser = await User.findOne({ role: 'admin' });
-                                
-                                if (!adminUser) {
-                                    throw new Error('Admin user not found');
-                                }
+                if (identifier === adminEmail && password === adminPassword) {
+                    const adminUser = await User.findOne({ role: 'admin' });
+                    
+                    if (!adminUser) {
+                        throw new Error('Admin user not found');
+                    }
 
-                                return {
-                                    _id: adminUser._id,  
-                                    name: adminUser.name,
-                                    email: adminUser.email,
-                                    role: adminUser.role,
-                                    username: adminUser.username
-                                };
-                                }
-
+                    return {
+                        _id: adminUser._id,  
+                        name: adminUser.name,
+                        email: adminUser.email,
+                        role: adminUser.role,
+                        username: adminUser.username,
+                        category: null // Admin doesn't have a category
+                    };
+                }
 
                 await dbConnect();
                 try {
+                    // Populate the category field to get the category name
                     const user = await User.findOne({
                         $or: [
                             { email: credentials.identifier },
                             { username: credentials.identifier }
                         ],
-                    }).select('+password');
+                    })
+                    .select('+password')
+                    .populate('category', 'name'); // Add this line to populate category
 
                     if (!user) {
                         throw new Error('No user found');
@@ -65,7 +62,8 @@ export const authOptions: NextAuthOptions = {
                         name: user.name,
                         email: user.email,
                         username: user.username,
-                        role: user.role
+                        role: user.role,
+                        category: user.category // Include the populated category
                     };
                 } catch (err: any) {
                     throw new Error(err);
@@ -79,6 +77,7 @@ export const authOptions: NextAuthOptions = {
                 token._id = user._id;
                 token.role = user.role;
                 token.username = user.username;
+                token.category = user.category; // Add category to JWT token
             }
             return token;
         },
@@ -89,7 +88,8 @@ export const authOptions: NextAuthOptions = {
                     role: token.role as 'admin' | 'student' | 'teacher',
                     username: token.username as string,
                     name: token.name,
-                    email: token.email
+                    email: token.email,
+                    category: token.category // Add category to session
                 };
             }
             return session;
