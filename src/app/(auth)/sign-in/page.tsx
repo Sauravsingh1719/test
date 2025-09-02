@@ -17,8 +17,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Eye, EyeOff, Mail, User, Lock, Phone, BookOpen, GraduationCap } from 'lucide-react'
 
-// ———————— ZOD Schemas ————————
+
 const signInSchema = z.object({
   identifier: z.string().min(1, 'Email or Username is required'),
   password: z.string().min(1, 'Password is required'),
@@ -40,6 +41,7 @@ export default function AuthTabs() {
   const [error, setError] = useState('')
   const [tabError, setTabError] = useState('')
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
+  const [showPassword, setShowPassword] = useState(false)
 
   // Sign In Form
   const signInForm = useForm<SignInFormData>({
@@ -60,27 +62,25 @@ export default function AuthTabs() {
   })
 
   const handleSignIn = async (data: SignInFormData) => {
-  setError('');
-  const result = await signIn('credentials', {
-    redirect: false,
-    ...data,
-  });
+    setError('');
+    const result = await signIn('credentials', {
+      redirect: false,
+      ...data,
+    });
 
-  if (result?.error) {
-    setError('Invalid credentials');
-  } else {
-   
-    const session = await getSession();
-    const role = session?.user?.role;
-    
-    
-    if (role) {
-      router.push(`/${role}`);
+    if (result?.error) {
+      setError('Invalid credentials');
     } else {
-      router.push('/');
+      const session = await getSession();
+      const role = session?.user?.role;
+      
+      if (role) {
+        router.push(`/${role}`);
+      } else {
+        router.push('/');
+      }
     }
   }
-}
 
   const handleSignUp = async (data: SignUpFormData) => {
     const session = await getSession();
@@ -112,56 +112,91 @@ export default function AuthTabs() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-200 px-4">
-      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 shadow-xl rounded-xl overflow-hidden bg-white">
-        {/* Left image panel */}
-        <div className="hidden md:block">
-          {activeTab === 'signin' ? (
-            <img
-              src="/images/signin-illustration.jpg"
-              alt="Sign In illustration"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <img
-              src="/images/signup-illustration.jpg"
-              alt="Sign Up illustration"
-              className="h-full w-full object-cover"
-            />
-          )}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 shadow-2xl rounded-2xl overflow-hidden bg-white dark:bg-gray-950">
+        {/* Left panel - Branding */}
+        <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-10">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <BookOpen className="h-8 w-8" />
+              <span className="text-2xl font-bold">EduPlatform</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-4">Welcome to Student Portal</h2>
+            <p className="text-blue-100">
+              Access your courses, track your progress, and connect with educators all in one place.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4 mt-8">
+            <div className="bg-blue-500/20 p-3 rounded-full">
+              <GraduationCap className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="font-semibold">Student Success</h4>
+              <p className="text-sm text-blue-100">Join thousands of students achieving their goals</p>
+            </div>
+          </div>
         </div>
 
         {/* Right form panel */}
-        <div className="p-8">
+        <div className="p-8 md:p-10">
+          <div className="text-center mb-8 lg:hidden">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <BookOpen className="h-6 w-6 text-blue-600" />
+              <span className="text-xl font-bold">EduPlatform</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Student Portal</h2>
+          </div>
+          
           <Tabs
             value={activeTab}
-            onValueChange={(value) =>
+            onValueChange={(value) => {
               setActiveTab(value as 'signin' | 'signup')
-            }
+              setError('')
+              setTabError('')
+            }}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid grid-cols-2 mb-8 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+              <TabsTrigger 
+                value="signin" 
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-blue-400 rounded-md transition-all"
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger 
+                value="signup"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-blue-400 rounded-md transition-all"
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
 
             {/* Sign In Tab */}
-            <TabsContent value="signin">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sign In</CardTitle>
-                  <CardDescription>Access your student account</CardDescription>
+            <TabsContent value="signin" className="focus-visible:outline-none">
+              <Card className="border-0 shadow-lg dark:bg-gray-900">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-2xl text-gray-800 dark:text-white">Welcome Back</CardTitle>
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
+                    Sign in to continue your learning journey
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <form onSubmit={signInForm.handleSubmit(handleSignIn)}>
+                <CardContent>
+                  <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="identifier">
+                      <Label htmlFor="identifier" className="text-gray-700 dark:text-gray-300">
                         Email or Username
                       </Label>
-                      <Input
-                        id="identifier"
-                        {...signInForm.register('identifier')}
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input
+                          id="identifier"
+                          className="pl-10 py-2 h-11"
+                          {...signInForm.register('identifier')}
+                        />
+                      </div>
                       {signInForm.formState.errors.identifier && (
                         <p className="text-sm text-red-500">
                           {signInForm.formState.errors.identifier.message}
@@ -170,12 +205,27 @@ export default function AuthTabs() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        {...signInForm.register('password')}
-                      />
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">Password</Label>
+                        <button 
+                          type="button" 
+                          className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          className="pl-10 py-2 h-11"
+                          {...signInForm.register('password')}
+                        />
+                      </div>
                       {signInForm.formState.errors.password && (
                         <p className="text-sm text-red-500">
                           {signInForm.formState.errors.password.message}
@@ -184,17 +234,24 @@ export default function AuthTabs() {
                     </div>
 
                     {error && (
-                      <p className="text-sm text-red-500">{error}</p>
+                      <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3">
+                        <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
+                      </div>
                     )}
 
                     <Button
                       type="submit"
-                      className="w-full mt-4"
+                      className="w-full h-11 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                       disabled={signInForm.formState.isSubmitting}
                     >
-                      {signInForm.formState.isSubmitting
-                        ? 'Signing In…'
-                        : 'Sign In'}
+                      {signInForm.formState.isSubmitting ? (
+                        <div className="flex items-center justify-center">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
+                          Signing In...
+                        </div>
+                      ) : (
+                        'Sign In'
+                      )}
                     </Button>
                   </form>
                 </CardContent>
@@ -202,19 +259,28 @@ export default function AuthTabs() {
             </TabsContent>
 
             {/* Sign Up Tab */}
-            <TabsContent value="signup">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>
-                    Register as a new student
+            <TabsContent value="signup" className="focus-visible:outline-none">
+              <Card className="border-0 shadow-lg dark:bg-gray-900">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-2xl text-gray-800 dark:text-white">Create Account</CardTitle>
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
+                    Join our learning community today
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <form onSubmit={signUpForm.handleSubmit(handleSignUp)}>
+                <CardContent>
+                  <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input id="name" {...signUpForm.register('name')} />
+                      <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Full Name</Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input 
+                          id="name" 
+                          className="pl-10 py-2 h-11"
+                          {...signUpForm.register('name')} 
+                        />
+                      </div>
                       {signUpForm.formState.errors.name && (
                         <p className="text-sm text-red-500">
                           {signUpForm.formState.errors.name.message}
@@ -223,8 +289,17 @@ export default function AuthTabs() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" {...signUpForm.register('email')} />
+                      <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input 
+                          id="email" 
+                          className="pl-10 py-2 h-11"
+                          {...signUpForm.register('email')} 
+                        />
+                      </div>
                       {signUpForm.formState.errors.email && (
                         <p className="text-sm text-red-500">
                           {signUpForm.formState.errors.email.message}
@@ -233,11 +308,17 @@ export default function AuthTabs() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="username">Username</Label>
-                      <Input
-                        id="username"
-                        {...signUpForm.register('username')}
-                      />
+                      <Label htmlFor="username" className="text-gray-700 dark:text-gray-300">Username</Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input 
+                          id="username" 
+                          className="pl-10 py-2 h-11"
+                          {...signUpForm.register('username')} 
+                        />
+                      </div>
                       {signUpForm.formState.errors.username && (
                         <p className="text-sm text-red-500">
                           {signUpForm.formState.errors.username.message}
@@ -246,12 +327,27 @@ export default function AuthTabs() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        {...signUpForm.register('password')}
-                      />
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="signup-password" className="text-gray-700 dark:text-gray-300">Password</Label>
+                        <button 
+                          type="button" 
+                          className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input
+                          id="signup-password"
+                          type={showPassword ? "text" : "password"}
+                          className="pl-10 py-2 h-11"
+                          {...signUpForm.register('password')}
+                        />
+                      </div>
                       {signUpForm.formState.errors.password && (
                         <p className="text-sm text-red-500">
                           {signUpForm.formState.errors.password.message}
@@ -260,27 +356,40 @@ export default function AuthTabs() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phoneNumber">
+                      <Label htmlFor="phoneNumber" className="text-gray-700 dark:text-gray-300">
                         Phone Number (optional)
                       </Label>
-                      <Input
-                        id="phoneNumber"
-                        {...signUpForm.register('phoneNumber')}
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Phone className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input 
+                          id="phoneNumber" 
+                          className="pl-10 py-2 h-11"
+                          {...signUpForm.register('phoneNumber')} 
+                        />
+                      </div>
                     </div>
 
                     {tabError && (
-                      <p className="text-sm text-red-500">{tabError}</p>
+                      <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3">
+                        <p className="text-sm text-red-600 dark:text-red-400 text-center">{tabError}</p>
+                      </div>
                     )}
 
                     <Button
                       type="submit"
-                      className="w-full mt-4"
+                      className="w-full h-11 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                       disabled={signUpForm.formState.isSubmitting}
                     >
-                      {signUpForm.formState.isSubmitting
-                        ? 'Creating Account…'
-                        : 'Sign Up'}
+                      {signUpForm.formState.isSubmitting ? (
+                        <div className="flex items-center justify-center">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
+                          Creating Account...
+                        </div>
+                      ) : (
+                        'Sign Up'
+                      )}
                     </Button>
                   </form>
                 </CardContent>
