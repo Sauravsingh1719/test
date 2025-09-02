@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ArrowLeft, UserPlus, Loader2 } from 'lucide-react';
 
 interface Category {
   _id: string;
@@ -78,7 +79,7 @@ export default function CreateTeacherPage() {
       );
 
       if (res.status === 201) {
-        toast.success('Teacher account created');
+        toast.success('Teacher account created successfully');
         router.push('/admin/teacher');
       } else {
         toast.error(res.data.message || 'Unexpected response');
@@ -92,36 +93,48 @@ export default function CreateTeacherPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12">
+    <div className="container max-w-2xl py-8 space-y-6">
+      <Button variant="outline" onClick={() => router.back()} className="gap-2">
+        <ArrowLeft className="h-4 w-4" /> Back
+      </Button>
+
       <Card>
-        <CardHeader>
-          <CardTitle>Create New Teacher</CardTitle>
-          <CardDescription>Fill in the details below</CardDescription>
+        <CardHeader className="text-center">
+          <div className="flex justify-center">
+            <div className="rounded-full bg-primary/10 p-3">
+              <UserPlus className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl">Create New Teacher</CardTitle>
+          <CardDescription>Fill in the details below to create a new teacher account</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="create-teacher-form" onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Full name"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder="Unique username"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -131,7 +144,8 @@ export default function CreateTeacherPage() {
                 required
               />
             </div>
-            <div>
+
+            <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
@@ -141,26 +155,30 @@ export default function CreateTeacherPage() {
                 required
               />
             </div>
-            <div>
+
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Strong password"
+                placeholder="Create a strong password"
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="category">Category</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Assigned Category</Label>
               <Select value={category} onValueChange={setCategory} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   {loadingCategories ? (
-                    <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                    <SelectItem value="loading" disabled>
+                      Loading categories...
+                    </SelectItem>
                   ) : (
                     categories.map((cat) => (
                       <SelectItem key={cat._id} value={cat._id}>
@@ -177,11 +195,20 @@ export default function CreateTeacherPage() {
           <Button
             type="submit"
             form="create-teacher-form"
-            variant="default"
             className="w-full"
             disabled={loading || loadingCategories}
           >
-            {loading ? 'Creating…' : 'Create Teacher'}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating Account...
+              </>
+            ) : (
+              <>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Create Teacher Account
+              </>
+            )}
           </Button>
         </CardFooter>
       </Card>

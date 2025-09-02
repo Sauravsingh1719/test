@@ -1,25 +1,25 @@
+// add-category/page.tsx
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { Plus, X, ArrowLeft } from 'lucide-react';
 
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function CreateCategoryPage() {
   const router = useRouter();
-
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [subcategories, setSubcategories] = useState<string[]>(['']);
@@ -49,7 +49,7 @@ export default function CreateCategoryPage() {
       });
 
       if (res.status === 201 && res.data.success) {
-        toast.success('Category created');
+        toast.success('Category created successfully');
         router.push('/admin/category');
       } else {
         toast.error(res.data.error || 'Failed to create category');
@@ -63,86 +63,98 @@ export default function CreateCategoryPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>New Category</CardTitle>
-          <CardDescription>Create a new category for your tests</CardDescription>
-        </CardHeader>
+    <div className="space-y-6">
+      <Button
+        variant="outline"
+        onClick={() => router.back()}
+        className="gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Button>
 
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Create New Category</CardTitle>
+          <CardDescription>
+            Add a new category to organize your products
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <form id="category-form" onSubmit={handleSubmit} className="space-y-6">
-            {/* Category Name */}
-            <div>
-              <Label htmlFor="cat-name">Name</Label>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Category Name *</Label>
               <Input
-                id="cat-name"
+                id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Science"
+                placeholder="e.g., Electronics, Clothing, etc."
               />
             </div>
 
-            {/* Category Description */}
-            <div>
-              <Label htmlFor="cat-desc">Description</Label>
-              <Input
-                id="cat-desc"
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional short description"
+                placeholder="Brief description of this category"
+                rows={3}
               />
             </div>
 
-            {/* Subcategories */}
-            <div>
+            <div className="space-y-4">
               <Label>Subcategories</Label>
-              {subcategories.map((sub, idx) => (
-                <div key={idx} className="flex items-center gap-2 mt-2">
-                  <Input
-                    value={sub}
-                    onChange={(e) => {
-                      const updated = [...subcategories];
-                      updated[idx] = e.target.value;
-                      setSubcategories(updated);
-                    }}
-                    placeholder={`Subcategory ${idx + 1}`}
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() =>
-                      setSubcategories((prev) => prev.filter((_, i) => i !== idx))
-                    }
-                  >
-                    X
-                  </Button>
-                </div>
-              ))}
-
+              <div className="space-y-3">
+                {subcategories.map((sub, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={sub}
+                      onChange={(e) => {
+                        const updated = [...subcategories];
+                        updated[idx] = e.target.value;
+                        setSubcategories(updated);
+                      }}
+                      placeholder={`Subcategory ${idx + 1}`}
+                    />
+                    {subcategories.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          setSubcategories((prev) => 
+                            prev.filter((_, i) => i !== idx)
+                          )
+                        }
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
               <Button
                 type="button"
                 variant="outline"
-                className="mt-4"
                 onClick={() => setSubcategories((prev) => [...prev, ''])}
+                className="gap-2"
               >
-                + Add Subcategory
+                <Plus className="h-4 w-4" />
+                Add Subcategory
               </Button>
             </div>
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? 'Creating Category...' : 'Create Category'}
+            </Button>
           </form>
         </CardContent>
-
-        <CardFooter>
-          <Button
-            type="submit"
-            form="category-form"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? 'Creating…' : 'Create Category'}
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );
