@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
                         ],
                     })
                     .select('+password')
-                    .populate('category', 'name'); // Add this line to populate category
+                    .populate('category', 'name'); 
 
                     if (!user) {
                         throw new Error('No user found');

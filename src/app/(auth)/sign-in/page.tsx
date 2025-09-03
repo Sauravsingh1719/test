@@ -119,7 +119,7 @@ export default function AuthTabs() {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <BookOpen className="h-8 w-8" />
-              <span className="text-2xl font-bold">EduPlatform</span>
+              <span className="text-2xl font-bold">Testify</span>
             </div>
             <h2 className="text-3xl font-bold mb-4">Welcome to Student Portal</h2>
             <p className="text-blue-100">
@@ -143,7 +143,7 @@ export default function AuthTabs() {
           <div className="text-center mb-8 lg:hidden">
             <div className="flex items-center justify-center gap-2 mb-2">
               <BookOpen className="h-6 w-6 text-blue-600" />
-              <span className="text-xl font-bold">EduPlatform</span>
+              <span className="text-xl font-bold">Testify</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Student Portal</h2>
           </div>
@@ -212,7 +212,7 @@ export default function AuthTabs() {
                           className="text-xs text-blue-600 hover:underline dark:text-blue-400"
                           onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? 'Hide' : 'Show'}
+                          {showPassword ? <Eye /> : <EyeOff />}
                         </button>
                       </div>
                       <div className="relative">
@@ -334,7 +334,7 @@ export default function AuthTabs() {
                           className="text-xs text-blue-600 hover:underline dark:text-blue-400"
                           onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? 'Hide' : 'Show'}
+                        {showPassword ? <Eye /> : <EyeOff />}
                         </button>
                       </div>
                       <div className="relative">
