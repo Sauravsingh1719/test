@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Plus, Trash2, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, CheckCircle, AlertCircle, Lock, User, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 type Question = {
@@ -22,7 +22,13 @@ type Question = {
 
 type Category = { _id: string; name: string };
 
-export default function TestCreate() {
+// Props to receive user role and assigned category
+interface TestCreateProps {
+  userRole: string;
+  userCategory?: string | { _id: string; name: string };
+}
+
+export default function TestCreate({ userRole, userCategory }: TestCreateProps) {
   const router = useRouter();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -55,7 +61,16 @@ export default function TestCreate() {
         const res = await axios.get("/api/categories");
         if (res.data?.success) {
           setCategories(res.data.data || []);
-          if (res.data.data?.length) setCategory(res.data.data[0]._id);
+          
+          // Set the initial category based on user role
+          if (userRole === "teacher" && userCategory) {
+            // If teacher, set to their assigned category
+            const categoryId = typeof userCategory === "string" ? userCategory : userCategory._id;
+            setCategory(categoryId);
+          } else if (res.data.data?.length) {
+            // For admin/student, set the first category as default
+            setCategory(res.data.data[0]._id);
+          }
         } else {
           setError("Failed to load categories");
           toast.error("Failed to load categories");
@@ -69,7 +84,7 @@ export default function TestCreate() {
       }
     }
     loadCategories();
-  }, []);
+  }, [userRole, userCategory]);
 
   function updateQuestion(index: number, newQ: Partial<Question>) {
     setQuestions(prev => {
@@ -166,8 +181,14 @@ export default function TestCreate() {
       if (res.data?.success) {
         setSuccessMsg("Test created successfully");
         toast.success("Test created successfully");
-        // small delay then redirect to tests list
-        setTimeout(() => router.push("/admin/tests"), 900);
+        // Redirect based on user role
+        setTimeout(() => {
+          if (userRole === "teacher") {
+            router.push("/teacher-dashboard");
+          } else {
+            router.push("/admin/tests");
+          }
+        }, 900);
       } else {
         setError(res.data?.error || res.data?.message || "Creation failed");
         toast.error(res.data?.error || res.data?.message || "Creation failed");
@@ -182,6 +203,18 @@ export default function TestCreate() {
     }
   }
 
+  // Get the current category name for display
+  const getCategoryName = () => {
+    if (userRole === "teacher" && userCategory) {
+      if (typeof userCategory === "string") {
+        return categories.find(c => c._id === userCategory)?.name || "Your assigned category";
+      } else {
+        return userCategory.name;
+      }
+    }
+    return null;
+  };
+
   return (
     <div className="container max-w-4xl py-6 space-y-6">
       <div className="flex items-center gap-2">
@@ -189,6 +222,26 @@ export default function TestCreate() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h2 className="text-3xl font-bold tracking-tight">Create New Test</h2>
+        <div className="ml-auto flex items-center gap-2">
+          {userRole === "admin" && (
+            <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center gap-1">
+              <Shield className="h-3 w-3" />
+              Admin Mode
+            </span>
+          )}
+          {userRole === "teacher" && (
+            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center gap-1">
+              <User className="h-3 w-3" />
+              Teacher Mode
+            </span>
+          )}
+          {userRole === "student" && (
+            <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center gap-1">
+              <User className="h-3 w-3" />
+              Student Mode
+            </span>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -214,6 +267,18 @@ export default function TestCreate() {
                 {loadingCategories ? (
                   <div className="flex items-center justify-center h-10 border rounded-md">
                     <span className="text-sm text-muted-foreground">Loading categories...</span>
+                  </div>
+                ) : userRole === "teacher" ? (
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted">
+                      <Lock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-sm">
+                        {getCategoryName()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Teachers can only create tests in their assigned category
+                    </p>
                   </div>
                 ) : (
                   <Select value={category} onValueChange={setCategory}>
@@ -354,7 +419,7 @@ export default function TestCreate() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/tests")}
+            onClick={() => router.push(userRole === "teacher" ? "/teacher-dashboard" : "/admin/tests")}
           >
             Cancel
           </Button>

@@ -32,13 +32,13 @@ export const authOptions: NextAuthOptions = {
                         email: adminUser.email,
                         role: adminUser.role,
                         username: adminUser.username,
-                        category: null // Admin doesn't have a category
+                        category: null 
                     };
                 }
 
                 await dbConnect();
                 try {
-                    // Populate the category field to get the category name
+                   
                     const user = await User.findOne({
                         $or: [
                             { email: credentials.identifier },
@@ -71,30 +71,36 @@ export const authOptions: NextAuthOptions = {
             }
         })
     ],
-    callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token._id = user._id;
-                token.role = user.role;
-                token.username = user.username;
-                token.category = user.category; // Add category to JWT token
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (token) {
-                session.user = {
-                    _id: token._id as string,
-                    role: token.role as 'admin' | 'student' | 'teacher',
-                    username: token.username as string,
-                    name: token.name,
-                    email: token.email,
-                    category: token.category // Add category to session
-                };
-            }
-            return session;
-        },
-    },
+   callbacks: {
+  async jwt({ token, user }) {
+    if (user) {
+      token.sub = user._id?.toString?.() ?? user._id;
+      token._id = token.sub;
+      token.role = user.role;
+      token.username = user.username;
+      token.name = user.name ?? token.name;
+      token.email = user.email ?? token.email;
+      token.category = user.category
+        ? (typeof user.category === 'string' ? user.category : { _id: user.category._id?.toString?.() ?? user.category._id, name: user.category.name })
+        : null;
+    }
+    return token;
+  },
+  async session({ session, token }) {
+    if (token) {
+      session.user = {
+        _id: token.sub,
+        role: token.role,
+        username: token.username,
+        name: token.name,
+        email: token.email,
+        category: token.category ?? null
+      };
+    }
+    return session;
+  },
+},
+
     session: {
         strategy: 'jwt',
     },

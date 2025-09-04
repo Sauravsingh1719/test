@@ -6,6 +6,7 @@ import Category from '@/components/Category';
 import StudentTestList from '@/components/student/TestList';
 import { BookOpen, Target, Award, Calendar, Star, Zap } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import StudentCreateTestPage from './test-creation/page';
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
@@ -78,6 +79,9 @@ export default async function Page() {
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Available Tests</h2>
           </div>
           <StudentTestList />
+        <div className="mt-10">
+          <StudentCreateTestPage />
+        </div>
         </div>
       </div>
     </div>

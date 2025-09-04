@@ -6,6 +6,7 @@ export type Student = {
   phoneNumber?: string;
   createdAt: string;
   role: 'student';
+  category: string | { _id: string; name: string } | null;
 };
 
 export type Teacher = {
@@ -16,4 +17,5 @@ export type Teacher = {
   phoneNumber?: string;
   createdAt: string;
   role: 'teacher';
+  category: string | { _id: string; name: string } | null;
 };

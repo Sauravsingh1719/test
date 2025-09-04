@@ -8,6 +8,7 @@ declare module "next-auth" {
             username?: string;
             name?: string;
             email?: string;
+            category?: string | { _id: string; name: string } | null;
         } & DefaultSession["user"];
     }
     
@@ -15,6 +16,9 @@ declare module "next-auth" {
         _id?: string | mongoose.Types.ObjectId;
         role?: 'admin' | 'student' | 'teacher';
         username?: string;
+        category?: string | { _id: string; name: string } | null;
+        name?: string;
+        email?: string;
     }
 }
 
@@ -23,6 +27,9 @@ declare module "next-auth/jwt" {
         _id?: string | mongoose.Types.ObjectId;
         role?: 'admin' | 'student' | 'teacher';
         username?: string;
+        category?: string | { _id: string; name: string } | null;
+        name?: string;
+        email?: string;
     }
 }
 
@@ -35,6 +42,7 @@ declare module "next-auth" {
       username?: string;
       name?: string;
       email?: string;
+      category?: string | { _id: string; name: string } | null;
     } & DefaultSession['user'];
   }
 }
