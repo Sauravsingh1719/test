@@ -99,7 +99,7 @@ export default async function TeacherDashboardPage() {
     );
   }
 
-  // Check if user is a teacher
+  
   if (session.user.role !== 'teacher') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -126,7 +126,6 @@ export default async function TeacherDashboardPage() {
       userName={session.user.name}
       userRole={session.user.role}
     />
-    <TeacherCreateTestPage />
     </div>
   );
 }

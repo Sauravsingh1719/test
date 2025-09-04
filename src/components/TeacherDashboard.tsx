@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Users, FileText, BookOpen, GraduationCap, RefreshCw, AlertCircle } from 'lucide-react';
+import Button from './button';
 
 interface Teacher {
   _id: string;
@@ -185,6 +186,7 @@ export default function TeacherDashboardClient({
                 </div>
               ) : (
                 tests.map((test) => (
+                  <div>
                   <div key={test._id} className="p-4 bg-gray-50 rounded-lg border border-gray-100">
                     <h3 className="font-semibold text-gray-800 mb-2">{test.title}</h3>
                     <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
@@ -200,11 +202,21 @@ export default function TeacherDashboardClient({
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <span className="text-sm text-gray-500">Created by {test.createdBy.name}</span>
                     </div>
+                    
                   </div>
-                ))
-              )}
-            </div>
+                  
+                </div>
+              ))
+            )}
+            <div>
+                    <a href='/teacher/test-creation'>
+                      <Button>
+                        Create New Test
+                      </Button>
+                    </a>
+                  </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
