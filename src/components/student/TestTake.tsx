@@ -30,7 +30,9 @@ export default function StudentTestTake({ testId }: { testId: string }) {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [timeTaken, setTimeTaken] = useState<number>(0); // Track time taken in seconds
   const timerRef = useRef<number | null>(null);
+  const startTimeRef = useRef<Date | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,6 +46,8 @@ export default function StudentTestTake({ testId }: { testId: string }) {
           setTest(res.data.data);
           setAnswers(new Array(res.data.data.questions.length).fill(null));
           setTimeLeft(res.data.data.duration * 60);
+         
+          startTimeRef.current = new Date();
         } else {
           setError(res.data?.error || "Failed to load test");
         }
@@ -66,14 +70,12 @@ export default function StudentTestTake({ testId }: { testId: string }) {
     };
   }, [testId, router]);
 
-  // Timer effect
+  // Timer effect - track time taken
   useEffect(() => {
     if (timeLeft === null) return;
-    if (timeLeft <= 0) {
-      void handleSubmit(); // auto submit
-      return;
-    }
+    
     timerRef.current = window.setInterval(() => {
+      setTimeTaken(prev => prev + 1); // Increment time taken every second
       setTimeLeft(prev => {
         if (!prev) return 0;
         if (prev <= 1) {
@@ -83,7 +85,10 @@ export default function StudentTestTake({ testId }: { testId: string }) {
         return prev - 1;
       });
     }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    
+    return () => { 
+      if (timerRef.current) clearInterval(timerRef.current); 
+    };
   }, [timeLeft !== null]);
 
   function formatTime(sec: number) {
@@ -116,13 +121,23 @@ export default function StudentTestTake({ testId }: { testId: string }) {
 
   async function handleSubmit() {
     if (!test || submitting || result) return;
+    
+    // Calculate final time taken
+    const finalTimeTaken = timeTaken;
+    
     if (timeLeft !== 0) {
       if (!confirm("Are you sure you want to submit your test?")) return;
     }
+    
     setSubmitting(true);
     setError(null);
     try {
-      const payload = { testId: test._id, answers };
+      const payload = { 
+        testId: test._id, 
+        answers,
+        timeTaken: finalTimeTaken // Include time taken in the payload
+      };
+      
       const res = await axios.post("/api/test/submit", payload);
       if (res.data?.success) {
         setResult(res.data.data);
@@ -248,6 +263,16 @@ export default function StudentTestTake({ testId }: { testId: string }) {
                 <div className="text-sm">Unanswered</div>
               </div>
             </div>
+            
+            {/* Display time taken if available */}
+            {result.timeTaken && (
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-xl font-bold text-blue-700">
+                  {formatTime(result.timeTaken)}
+                </div>
+                <div className="text-sm">Time Taken</div>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             {resultId && (
@@ -414,6 +439,13 @@ export default function StudentTestTake({ testId }: { testId: string }) {
                   Less than 5 minutes remaining!
                 </p>
               )}
+              
+              {/* Time Taken Display */}
+              <div className="mt-4 pt-4 border-t border-blue-200">
+                <p className="text-center text-blue-800 text-sm">
+                  Time taken: {formatTime(timeTaken)}
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -469,6 +501,10 @@ export default function StudentTestTake({ testId }: { testId: string }) {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Unanswered</span>
                 <span className="font-medium text-amber-600">{test.questions.length - answeredQuestions}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Time Taken</span>
+                <span className="font-medium text-blue-600">{formatTime(timeTaken)}</span>
               </div>
             </CardContent>
           </Card>

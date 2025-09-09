@@ -1,7 +1,8 @@
-// src/app/api/test/submit/route.ts
+
 import dbConnect from "@/app/lib/dbConnect";
 import Test from "@/models/Test";
 import Result from "@/models/Result";
+import Rank from "@/models/Rank"; // Import the Rank model
 import { getToken } from "next-auth/jwt";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { testId, answers } = body;
+    const { testId, answers, timeTaken } = body;
 
     if (!testId || !Array.isArray(answers)) {
       return NextResponse.json({ success: false, error: "Missing payload (testId and answers required)" }, { status: 400 });
@@ -25,6 +26,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid test id" }, { status: 400 });
     }
 
+    const validatedTimeTaken = typeof timeTaken === 'number' && timeTaken >= 0 ? timeTaken : 0;
+
     const test = await Test.findById(testId).lean();
     if (!test) {
       return NextResponse.json({ success: false, error: "Test not found" }, { status: 404 });
@@ -32,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     const total = Array.isArray(test.questions) ? test.questions.length : 0;
 
-    // marks config (normalize wrong to negative)
+    // marks config
     const marksCorrect = test.marks && typeof test.marks.correct === "number" ? Number(test.marks.correct) : 1;
     const marksWrongRaw = test.marks && typeof test.marks.wrong === "number" ? Number(test.marks.wrong) : 0;
     const marksWrong = -Math.abs(marksWrongRaw);
@@ -43,19 +46,16 @@ export async function POST(request: NextRequest) {
     let unanswered = 0;
     let score = 0;
 
-    // Normalize answers array length: create an answersToSave array of length `total`,
-    // fill missing with -1, clamp extras.
     const answersToSave: number[] = new Array(total).fill(-1);
     for (let i = 0; i < total; i++) {
       const given = answers[i];
-      // treat undefined/null or non-number or negative as unanswered => store -1
       if (typeof given !== "number" || given < 0) {
         answersToSave[i] = -1;
         unanswered++;
         score += marksUnanswered;
         continue;
       }
-      // valid numeric answer
+      
       answersToSave[i] = Number(given);
 
       const q = test.questions[i];
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const maxScore = marksCorrect * total;
     const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100 * 100) / 100 : 0;
 
-    // Save result (now includes answersToSave and total)
+    // Save result
     const result = await Result.create({
       testId: new mongoose.Types.ObjectId(testId),
       userId: new mongoose.Types.ObjectId(token.sub),
@@ -82,8 +82,25 @@ export async function POST(request: NextRequest) {
       total,
       score,
       maxScore,
-      percentage
+      percentage,
+      timeTaken: validatedTimeTaken
     });
+
+    // Check if this user already has a rank entry for this test
+    const existingRank = await Rank.findOne({
+      testId: new mongoose.Types.ObjectId(testId),
+      userId: new mongoose.Types.ObjectId(token.sub)
+    });
+
+    // If no rank exists for this user+test combination, create one
+    if (!existingRank) {
+      await Rank.create({
+        testId: new mongoose.Types.ObjectId(testId),
+        userId: new mongoose.Types.ObjectId(token.sub),
+        percentage,
+        timeTaken: validatedTimeTaken
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -95,7 +112,8 @@ export async function POST(request: NextRequest) {
         total,
         score,
         maxScore,
-        percentage
+        percentage,
+        timeTaken: result.timeTaken
       }
     }, { status: 201 });
 

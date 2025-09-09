@@ -20,8 +20,8 @@ export async function POST(req: Request) {
         // Check for existing user
         const existingUser = await User.findOne({ 
             $or: [
-                { email: email.toLowerCase() },
-                { username: username.toLowerCase() }
+                { email: email },
+                { username: username }
             ]
         });
 
@@ -34,9 +34,9 @@ export async function POST(req: Request) {
 
         const user = await User.create({
                 name:       name.trim(),
-                email:      email.toLowerCase().trim(),
+                email:      email.trim(),
                 password,                      // ← pass raw password here
-                username: username.toLowerCase().trim(),
+                username: username.trim(),
                 phoneNumber: phoneNumber?.trim(),
                 role: "student"
             });

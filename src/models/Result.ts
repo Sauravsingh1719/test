@@ -12,12 +12,20 @@ const ResultSchema = new mongoose.Schema({
 
   
   answers: { type: [Number], required: true }, 
-
+ 
  
   total: { type: Number, required: true },
   score: { type: Number, required: true },
   maxScore: { type: Number, required: true },
-  percentage: { type: Number, required: true }
+  percentage: { type: Number, required: true },
+  timeTaken: { 
+    type: Number, 
+    required: true, 
+    min: [1, "Time taken must be at least 1 second"] 
+  }
 }, { timestamps: true });
+
+ResultSchema.index({ testId: 1, percentage: -1, timeTaken: 1 });
+ResultSchema.index({ testId: 1, userId: 1 });
 
 export default mongoose.models.Result || mongoose.model("Result", ResultSchema);

@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest, { params }: { params: { resultId: string } }) {
   try {
     await dbConnect();
-    const { resultId } = params;
+    const { resultId } = await params;
 
     if (!mongoose.isValidObjectId(resultId)) {
       return NextResponse.json({ success: false, error: "Invalid result id" }, { status: 400 });
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: { resultId
       return NextResponse.json({ success: false, error: "Result not found" }, { status: 404 });
     }
 
-    // Authorization: allow owner, admin, or teacher
+    
     const isOwner = String(result.userId) === String(token.sub);
     const isPrivileged = token.role === "admin" || token.role === "teacher" || token.role === "student";
     if (!isOwner && !isPrivileged) {

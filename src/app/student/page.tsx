@@ -13,7 +13,7 @@ export default async function Page() {
   const name = session?.user?.name || 'Guest';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900 pb-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900 pb-10 rounded-xl shadow-xl">
       {/* Header Section */}
       <div className="pt-8 pb-6 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">

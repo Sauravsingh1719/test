@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle, XCircle, HelpCircle, ArrowLeft, BookOpen, Award, Clock, BarChart3 } from "lucide-react";
 
+
 type QReview = {
   _id: string;
   questionText: string;
@@ -106,6 +107,7 @@ export default function ResultDetail({ resultId }: { resultId: string }) {
   const scoreColor = percentage >= 80 ? "text-green-600" : percentage >= 60 ? "text-amber-600" : "text-red-600";
 
   return (
+    <div>
     <div className="container py-4 space-y-6 px-[15%]">
       {/* Header */}
       <div className="flex items-center gap-2">
@@ -115,7 +117,7 @@ export default function ResultDetail({ resultId }: { resultId: string }) {
         <h1 className="text-3xl font-bold tracking-tight">Test Results</h1>
       </div>
 
-      {/* Result Summary */}
+      
       <Card>
         <CardHeader>
           <CardTitle>{test.title}</CardTitle>
@@ -262,6 +264,8 @@ export default function ResultDetail({ resultId }: { resultId: string }) {
           );
         })}
       </div>
+      
+    </div>
     </div>
   );
 }
