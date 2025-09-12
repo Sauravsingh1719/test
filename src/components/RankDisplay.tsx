@@ -78,7 +78,8 @@ export default function RankDisplay({ testId }: RankDisplayProps) {
   };
 
   return (
-    <Card>
+    <div>
+    <Card className='px-[15%]'>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-yellow-500" />
@@ -183,5 +184,6 @@ export default function RankDisplay({ testId }: RankDisplayProps) {
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }

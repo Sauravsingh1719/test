@@ -216,7 +216,7 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
   };
 
   return (
-    <div className="container  py-[15%] space-y-6 lg:px-[20%] md:px-[10%] sm:px-[5%]">
+    <div className="container  py-[4%] space-y-6 lg:px-[15%] md:px-[10%] sm:px-[5%]">
       <div className="flex items-center gap-2">
         <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4" />

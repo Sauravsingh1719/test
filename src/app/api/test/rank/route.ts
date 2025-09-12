@@ -1,6 +1,6 @@
 // src/app/api/test/rank/route.ts
 import dbConnect from "@/app/lib/dbConnect";
-import Rank from "@/models/Rank"; // Use Rank model instead of Result
+import Rank from "@/models/Rank";
 import mongoose from "mongoose";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
@@ -44,13 +44,16 @@ export async function POST(request: NextRequest) {
       .select("userId percentage timeTaken")
       .populate("userId", "name");
 
+    // Filter out any ranks with null userId (users that might have been deleted)
+    const validRanks = allRanks.filter(rank => rank.userId !== null);
+
     // Calculate ranks
     let currentRank = 1;
     let previousPercentage = -1;
     let previousTimeTaken = -1;
     let userRank = 0;
 
-    const rankedResults = allRanks.map((rank, index) => {
+    const rankedResults = validRanks.map((rank, index) => {
       // If percentage is different from previous, increment rank
       // If percentage is same but time taken is different, increment rank
       if (index > 0 && (
@@ -84,14 +87,14 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         userRank,
-        totalParticipants: allRanks.length,
+        totalParticipants: validRanks.length,
         userPercentage: userRankEntry.percentage,
         topper: topper ? {
           name: topper.name,
           percentage: topper.percentage,
           timeTaken: topper.timeTaken
         } : null,
-        leaderboard: rankedResults.slice(0, 10) // Top 10 performers
+        leaderboard: rankedResults.slice(0, 10) 
       }
     }, { status: 200 });
 

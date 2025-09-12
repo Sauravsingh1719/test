@@ -4,9 +4,10 @@ import React from 'react'
 import { authOptions } from '../api/auth/[...nextauth]/options';
 import Category from '@/components/Category';
 import StudentTestList from '@/components/student/TestList';
-import { BookOpen, Target, Award, Calendar, Star, Zap } from 'lucide-react';
+import { BookOpen, Target, Award, Calendar, Star, Zap, PlusCircle, Sparkles, Users, Brain } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
-import StudentCreateTestPage from './test-creation/page';
+import Link from 'next/link';
+import Button from '@/components/button';
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
@@ -28,7 +29,13 @@ export default async function Page() {
               </p>
             </div>
             
-            
+            {/* Create Test Button */}
+            <Link href="/student/test-creation">
+             <Button className='flex flex-row gap-2 items-center'>
+                      <PlusCircle className="h-5 w-5" />
+                      Create Your Test
+                    </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -79,9 +86,57 @@ export default async function Page() {
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Available Tests</h2>
           </div>
           <StudentTestList />
-        <div className="mt-10">
-          <StudentCreateTestPage />
         </div>
+      </div>
+
+      {/* Become a Creator Section */}
+      <div className="px-4 md:px-6 mt-16">
+        <div className="max-w-7xl mx-auto">
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-0 shadow-lg overflow-hidden">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="h-5 w-5 text-yellow-500" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+                      Unleash Your Creativity
+                    </span>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-3">
+                    Become a Test Creator
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                    Share your knowledge with the community by creating engaging tests. Help others learn while establishing yourself as an expert in your field.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm">Reach more students</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-purple-500" />
+                      <span className="text-sm">Reinforce your knowledge</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-amber-500" />
+                      <span className="text-sm">Build your reputation</span>
+                    </div>
+                  </div>
+                  <Link href="/student/test-creation">
+                    <Button className='flex flex-row gap-2 items-center'>
+                      <PlusCircle className="h-5 w-5" />
+                      Create Your First Test
+                    </Button>
+                  </Link>
+                </div>
+                <div className="hidden md:block flex-shrink-0">
+                  <div className="w-48 h-48 bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-700 dark:to-purple-700 rounded-full flex items-center justify-center">
+                    <PlusCircle className="h-16 w-16 text-blue-600 dark:text-blue-300" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

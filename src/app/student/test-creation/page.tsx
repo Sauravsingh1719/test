@@ -17,5 +17,5 @@ export default async function StudentCreateTestPage() {
     );
   }
 
-  return <TestCreate userRole={session.user.role} />;
+  return <div className="container mx-auto px-4"><TestCreate userRole={session.user.role} /></div>;
 }   
