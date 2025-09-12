@@ -35,7 +35,7 @@ export default function RootLayout({
         <AuthProvider>
           <NavbarDemo />
           
-          <main className="flex-1">
+          <main className="flex-1 bg-blue-100">
             {children}
           </main>
 

@@ -32,7 +32,7 @@ export function NavbarDemo() {
     },
     {
       name: "Test",
-      link: "/tests",
+      link: "/test",
     },
     {
       name: "Category",
@@ -72,9 +72,6 @@ export function NavbarDemo() {
           <div className="flex items-center gap-4">
             {session ? (
               <>
-                <span className="text-sm text-gray-700">
-                  Welcome, {session.user?.name}
-                </span>
                 <NavbarButton variant="secondary" onClick={handleLogout}>
                   Logout
                 </NavbarButton>
