@@ -1,5 +1,5 @@
+
 import mongoose from "mongoose";
-import dbConnect from "@/app/lib/dbConnect";
 
 const QuestionSchema = new mongoose.Schema({
     questionText: { 
@@ -66,6 +66,20 @@ const TestSchema = new mongoose.Schema({
         required: [true, "Duration is required"],
         min: [5, "Minimum duration is 5 minutes"],
         max: [180, "Maximum duration is 3 hours"]
+    },
+    marks: {
+        correct: { 
+            type: Number, 
+            default: 1 
+        },
+        wrong: { 
+            type: Number, 
+            default: 0 
+        },
+        unanswered: { 
+            type: Number, 
+            default: 0 
+        }
     }
 }, { 
     timestamps: true  

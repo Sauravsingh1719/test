@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -27,19 +26,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const isTestTakingPage = false; 
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <AuthProvider>
-          <NavbarDemo />
+          {!isTestTakingPage && <NavbarDemo />}
           
-          <main className="flex-1 bg-blue-100">
+          <main className={`flex-1 ${isTestTakingPage ? 'bg-gray-100' : 'bg-blue-100'}`}>
             {children}
           </main>
 
-          <Footer />
+          {!isTestTakingPage && <Footer />}
 
           <Toaster />
         </AuthProvider>

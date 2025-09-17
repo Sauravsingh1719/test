@@ -125,3 +125,26 @@ html{
     @apply bg-background text-foreground;
   }
 }
+
+
+.full-screen-mode {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.full-screen-mode body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.full-screen-mode main {
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hide navbar and footer in full screen mode */
+.full-screen-mode .navbar,
+.full-screen-mode .footer {
+  display: none !important;
+}

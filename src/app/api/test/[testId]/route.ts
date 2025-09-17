@@ -4,11 +4,7 @@ import mongoose from "mongoose";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-/**
- * GET /api/test/:testId
- * - PUBLIC SAFE FETCH: returns questions but WITHOUT correctAnswer/explanation
- * - This allows students/public to take the test without seeing answers.
- */
+
 export async function GET(request: NextRequest, { params }: { params: { testId: string } }) {
   try {
 
@@ -51,10 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
   }
 }
 
-/**
- * PUT /api/test/:testId
- * - Update test (admin or teacher who created the test)
- */
+
 export async function PUT(request: NextRequest, { params }: { params: { testId: string } }) {
   try {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
@@ -62,7 +55,7 @@ export async function PUT(request: NextRequest, { params }: { params: { testId: 
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const testId = params.testId;
+    const testId = await params.testId;
     if (!mongoose.isValidObjectId(testId)) {
       return NextResponse.json({ success: false, error: "Invalid test id" }, { status: 400 });
     }
@@ -75,18 +68,19 @@ export async function PUT(request: NextRequest, { params }: { params: { testId: 
       return NextResponse.json({ success: false, error: "Test not found" }, { status: 404 });
     }
 
-    // If teacher, ensure they own the test
+  
     if (token.role === "teacher" && String(test.createdBy) !== String(token.sub)) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    // Minimal update behavior: allow title, description, questions, duration, category
-    const { title, description, questions, duration, category } = body;
+    
+    const { title, description, questions, duration, category, marks } = body;
     if (title !== undefined) test.title = String(title).trim();
     if (description !== undefined) test.description = String(description);
     if (questions !== undefined && Array.isArray(questions)) test.questions = questions;
     if (duration !== undefined) test.duration = Number(duration);
     if (category !== undefined && mongoose.isValidObjectId(category)) test.category = category;
+    if (marks !== undefined) test.marks = marks;
 
     await test.save();
     return NextResponse.json({ success: true, data: test }, { status: 200 });
@@ -95,7 +89,6 @@ export async function PUT(request: NextRequest, { params }: { params: { testId: 
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
-
 /**
  * DELETE /api/test/:testId
  * - Allowed only to admin OR the teacher who created the test
@@ -107,7 +100,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { testI
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const testId = params.testId;
+    const testId = await params.testId;
     if (!mongoose.isValidObjectId(testId)) {
       return NextResponse.json({ success: false, error: "Invalid test id" }, { status: 400 });
     }

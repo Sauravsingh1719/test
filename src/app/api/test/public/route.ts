@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
 
     const tests = await Test.find()
       .select("title description duration category createdBy createdAt") // category (lowercase)
-      .populate("category", "name")   // populate the 'category' field
-      .populate("createdBy", "name")  // populate user name for createdBy
+      .populate("category", "name")
+      .populate("createdBy", "name")
       .sort({ createdAt: -1 })
       .lean();
 

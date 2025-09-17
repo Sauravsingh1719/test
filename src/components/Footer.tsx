@@ -3,7 +3,7 @@ import React from "react";
 
 function Footer() {
   return (
-    <footer className="bg-slate-300 text-slate-900 py-[8%]">
+    <footer className="footer bg-slate-300 text-slate-900 py-[8%]">
       <div className="max-w-7xl mx-auto px-6 md:px-[10%] py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand + Address */}

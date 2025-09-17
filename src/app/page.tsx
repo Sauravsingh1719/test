@@ -1,8 +1,7 @@
 import TestifyPass from '@/components/Fifth'
 import Fourth from '@/components/Fourth'
 import Hero from '@/components/Hero'
-
-import StudentTestList from '@/components/student/TestList'
+import TestListWithCategories from '@/components/NewTestList'
 import Third from '@/components/Third'
 import React from 'react'
 
@@ -15,7 +14,7 @@ const page = () => {
           <h2 className='text-5xl font-bold text-blue-700 '>Featured Tests 📝</h2>
         </div>
         <div className='py-4'>
-          <StudentTestList />
+          <TestListWithCategories />
         </div>
       </div>
       <div>

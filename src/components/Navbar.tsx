@@ -63,7 +63,7 @@ export function NavbarDemo() {
   }
 
   return (
-    <div className="fixed w-full z-50">
+    <div className="navbar fixed w-full z-50">
       <Navbar>
         {/* Desktop Navigation */}
         <NavBody>

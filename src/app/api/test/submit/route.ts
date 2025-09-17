@@ -1,8 +1,8 @@
-
+// src/app/api/test/submit/route.ts
 import dbConnect from "@/app/lib/dbConnect";
 import Test from "@/models/Test";
 import Result from "@/models/Result";
-import Rank from "@/models/Rank"; // Import the Rank model
+import Rank from "@/models/Rank";
 import { getToken } from "next-auth/jwt";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -35,11 +35,10 @@ export async function POST(request: NextRequest) {
 
     const total = Array.isArray(test.questions) ? test.questions.length : 0;
 
-    // marks config
-    const marksCorrect = test.marks && typeof test.marks.correct === "number" ? Number(test.marks.correct) : 1;
-    const marksWrongRaw = test.marks && typeof test.marks.wrong === "number" ? Number(test.marks.wrong) : 0;
-    const marksWrong = -Math.abs(marksWrongRaw);
-    const marksUnanswered = test.marks && typeof test.marks.unanswered === "number" ? Number(test.marks.unanswered) : 0;
+    // Get marks configuration with defaults
+    const marksCorrect = test.marks?.correct || 1;
+    const marksWrong = test.marks?.wrong || 0;
+    const marksUnanswered = test.marks?.unanswered || 0;
 
     let correct = 0;
     let wrong = 0;
@@ -49,6 +48,8 @@ export async function POST(request: NextRequest) {
     const answersToSave: number[] = new Array(total).fill(-1);
     for (let i = 0; i < total; i++) {
       const given = answers[i];
+      
+      // Handle unanswered questions
       if (typeof given !== "number" || given < 0) {
         answersToSave[i] = -1;
         unanswered++;
@@ -57,17 +58,23 @@ export async function POST(request: NextRequest) {
       }
       
       answersToSave[i] = Number(given);
-
       const q = test.questions[i];
+      
+      // Handle correct answers
       if (answersToSave[i] === q.correctAnswer) {
         correct++;
         score += marksCorrect;
-      } else {
+      } 
+      // Handle wrong answers (apply negative marking)
+      else {
         wrong++;
-        score += marksWrong;
+        score -= marksWrong; // Subtract the negative marks
       }
     }
 
+    // Ensure score doesn't go below 0
+    score = Math.max(0, score);
+    
     const maxScore = marksCorrect * total;
     const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100 * 100) / 100 : 0;
 

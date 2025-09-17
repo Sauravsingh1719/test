@@ -26,7 +26,6 @@ export async function GET(request: NextRequest, { params }: { params: { resultId
       return NextResponse.json({ success: false, error: "Result not found" }, { status: 404 });
     }
 
-    
     const isOwner = String(result.userId) === String(token.sub);
     const isPrivileged = token.role === "admin" || token.role === "teacher" || token.role === "student";
     if (!isOwner && !isPrivileged) {
@@ -39,7 +38,7 @@ export async function GET(request: NextRequest, { params }: { params: { resultId
       return NextResponse.json({ success: false, error: "Test not found" }, { status: 404 });
     }
 
-    // Compose per-question review objects: questionText, options, correctAnswer, explanation, userAnswer
+    // Compose per-question review objects
     const questionsReview = (test.questions || []).map((q: any, idx: number) => ({
       _id: q._id,
       questionText: q.questionText,
@@ -67,7 +66,7 @@ export async function GET(request: NextRequest, { params }: { params: { resultId
         title: test.title,
         description: test.description,
         duration: test.duration,
-        marks: test.marks
+        marks: test.marks || { correct: 1, wrong: 0, unanswered: 0 } // Include marks with defaults
       },
       questions: questionsReview
     };

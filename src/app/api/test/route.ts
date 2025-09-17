@@ -5,12 +5,6 @@ import mongoose from "mongoose";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-/**
- * GET /api/test
- * - admin: returns all tests
- * - teacher: returns tests created by that teacher
- * (protected)
- */
 export async function GET(request: NextRequest) {
   try {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
@@ -40,11 +34,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * POST /api/test
- * - admin or teacher can create a test
- * - minimal checks (title, category, questions array, duration)
- */
 export async function POST(request: NextRequest) {
   try {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
@@ -53,9 +42,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { title, category, description, questions, duration } = data;
+    const { title, category, description, questions, duration, marks } = data;
 
-    // Minimal required checks (skip deep validation for now)
+    // Minimal required checks
     if (!title || !category || !Array.isArray(questions) || questions.length < 1 || !duration) {
       return NextResponse.json({ success: false, error: "Missing or invalid fields" }, { status: 400 });
     }
@@ -66,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    // Optional: check category exists (helpful)
+    
     const cat = await Category.findById(category);
     if (!cat) {
       return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });
@@ -78,6 +67,7 @@ export async function POST(request: NextRequest) {
       description: description || "",
       questions,
       duration,
+      marks: marks || { correct: 1, wrong: 0, unanswered: 0 }, 
       createdBy: new mongoose.Types.ObjectId(token.sub)
     });
 
