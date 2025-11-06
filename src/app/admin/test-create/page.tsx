@@ -16,4 +16,10 @@ export default async function AdminCreateTestPage() {
     );
   }
 
-  return <TestCreate userRole={session.user.role} userCategory={session.user.category} />;
+  return (
+    <TestCreate 
+      userRole={session.user.role} 
+      userCategory={session.user.category} 
+    />
+  );
+}
