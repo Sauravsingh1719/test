@@ -136,7 +136,7 @@ export default function AdminTestsPage() {
           <p className="text-muted-foreground">Manage all tests in the system</p>
         </div>
         <Button asChild>
-          <Link href="/test/create">
+          <Link href="/admin/test-create">
             <Plus className="mr-2 h-4 w-4" /> Create New Test
           </Link>
         </Button>

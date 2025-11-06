@@ -1,4 +1,3 @@
-// src/components/TestCreate.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -15,14 +14,13 @@ import { toast } from "sonner";
 
 type Question = {
   questionText: string;
-  options: string[]; // length 4
-  correctAnswer: number; // 0..3
+  options: string[]; 
+  correctAnswer: number; 
   explanation?: string;
 };
 
 type Category = { _id: string; name: string };
 
-// Props to receive user role and assigned category
 interface TestCreateProps {
   userRole: string;
   userCategory?: string | { _id: string; name: string };
@@ -62,13 +60,13 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
         if (res.data?.success) {
           setCategories(res.data.data || []);
           
-          // Set the initial category based on user role
+         
           if (userRole === "teacher" && userCategory) {
-            // If teacher, set to their assigned category
+            
             const categoryId = typeof userCategory === "string" ? userCategory : userCategory._id;
             setCategory(categoryId);
           } else if (res.data.data?.length) {
-            // For admin/student, set the first category as default
+           
             setCategory(res.data.data[0]._id);
           }
         } else {
@@ -137,7 +135,7 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
       if (typeof q.correctAnswer !== "number" || q.correctAnswer < 0 || q.correctAnswer > 3) return `Question ${i + 1}: choose the correct option`;
     }
 
-    // marks may be any number; warn but allow if wrong is positive
+    
     if (!Number.isFinite(marksCorrect)) return "Marks for correct must be a number";
     if (!Number.isFinite(marksWrong)) return "Marks for wrong must be a number";
     if (!Number.isFinite(marksUnanswered)) return "Marks for unanswered must be a number";
@@ -181,7 +179,7 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
       if (res.data?.success) {
         setSuccessMsg("Test created successfully");
         toast.success("Test created successfully");
-        // Redirect based on user role
+        
         setTimeout(() => {
           if (userRole === "teacher") {
             router.push("/teacher-dashboard");
@@ -203,7 +201,7 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
     }
   }
 
-  // Get the current category name for display
+ 
   const getCategoryName = () => {
     if (userRole === "teacher" && userCategory) {
       if (typeof userCategory === "string") {
@@ -371,7 +369,7 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor={`question-${qi}`}>Question Text</Label>
-                    <Input
+                    <Textarea
                       id={`question-${qi}`}
                       value={q.questionText}
                       onChange={e => updateQuestion(qi, { questionText: e.target.value })}
@@ -402,7 +400,7 @@ export default function TestCreate({ userRole, userCategory }: TestCreateProps) 
 
                   <div className="space-y-2">
                     <Label htmlFor={`explanation-${qi}`}>Explanation (optional)</Label>
-                    <Input
+                    <Textarea
                       id={`explanation-${qi}`}
                       value={q.explanation}
                       onChange={e => updateQuestion(qi, { explanation: e.target.value })}

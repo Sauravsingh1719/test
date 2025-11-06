@@ -4,11 +4,9 @@ import mongoose from "mongoose";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-
 export async function GET(request: NextRequest, { params }: { params: { testId: string } }) {
   try {
-
-     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token || (token.role !== "admin" && token.role !== "teacher" && token.role !== "student")) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
@@ -27,7 +25,9 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
     const safeQuestions = (test.questions || []).map(q => ({
       _id: q._id,
       questionText: q.questionText,
-      options: q.options
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation
     }));
 
     const payload = {
@@ -37,6 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
       category: test.category,
       createdBy: test.createdBy,
       duration: test.duration,
+      marks: test.marks,
       questions: safeQuestions
     };
 
@@ -46,7 +47,6 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
-
 
 export async function PUT(request: NextRequest, { params }: { params: { testId: string } }) {
   try {
@@ -68,19 +68,29 @@ export async function PUT(request: NextRequest, { params }: { params: { testId: 
       return NextResponse.json({ success: false, error: "Test not found" }, { status: 404 });
     }
 
-  
     if (token.role === "teacher" && String(test.createdBy) !== String(token.sub)) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    
     const { title, description, questions, duration, category, marks } = body;
     if (title !== undefined) test.title = String(title).trim();
     if (description !== undefined) test.description = String(description);
-    if (questions !== undefined && Array.isArray(questions)) test.questions = questions;
     if (duration !== undefined) test.duration = Number(duration);
     if (category !== undefined && mongoose.isValidObjectId(category)) test.category = category;
     if (marks !== undefined) test.marks = marks;
+
+    // Handle questions update with proper validation
+    if (questions !== undefined && Array.isArray(questions)) {
+      // Validate questions before updating
+      const validatedQuestions = questions.map(q => ({
+        questionText: q.questionText,
+        options: q.options,
+        correctAnswer: q.correctAnswer !== undefined ? Number(q.correctAnswer) : 0,
+        explanation: q.explanation || ""
+      }));
+      
+      test.questions = validatedQuestions;
+    }
 
     await test.save();
     return NextResponse.json({ success: true, data: test }, { status: 200 });
@@ -89,10 +99,7 @@ export async function PUT(request: NextRequest, { params }: { params: { testId: 
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
-/**
- * DELETE /api/test/:testId
- * - Allowed only to admin OR the teacher who created the test
- */
+
 export async function DELETE(request: NextRequest, { params }: { params: { testId: string } }) {
   try {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
