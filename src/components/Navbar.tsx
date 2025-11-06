@@ -20,7 +20,7 @@ export function NavbarDemo() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Set mounted state to avoid hydration issues
+  
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -36,7 +36,7 @@ export function NavbarDemo() {
     },
     {
       name: "Category",
-      link: "/categories",
+      link: "/admin/category",
     },
     {
       name: "Contact",
