@@ -35,7 +35,7 @@ export default function RankDisplay({ testId }: RankDisplayProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Don't render if testId is not provided
+
   if (!testId) {
     return (
       <Alert className="bg-yellow-50 border-yellow-200">
