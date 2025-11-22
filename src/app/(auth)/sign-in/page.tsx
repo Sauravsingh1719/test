@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { getSession, signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Button from '@/components/button'
 import {
   Card,
@@ -14,11 +14,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Eye, EyeOff, Mail, User, Lock, Phone, BookOpen, GraduationCap } from 'lucide-react'
-
+import { Eye, EyeOff, Mail, User, Lock, Phone, BookOpen, GraduationCap, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { useDebounce } from '@uidotdev/usehooks'
 
 const signInSchema = z.object({
   identifier: z.string().min(1, 'Email or Username is required'),
@@ -42,6 +43,12 @@ export default function AuthTabs() {
   const [tabError, setTabError] = useState('')
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
   const [showPassword, setShowPassword] = useState(false)
+  
+  // Username availability states
+  const [username, setUsername] = useState('')
+  const [usernameMessage, setUsernameMessage] = useState('')
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
+  const debouncedUsername = useDebounce(username, 300)
 
   // Sign In Form
   const signInForm = useForm<SignInFormData>({
@@ -61,55 +68,80 @@ export default function AuthTabs() {
     },
   })
 
-  const handleSignIn = async (data: SignInFormData) => {
-    setError('');
-    const result = await signIn('credentials', {
-      redirect: false,
-      ...data,
-    });
+  // Username availability check
+  useEffect(() => {
+    const checkUsernameUnique = async () => {
+      if (debouncedUsername && debouncedUsername.length >= 3) {
+        setIsCheckingUsername(true)
+        setUsernameMessage('')
+        try {
+          const response = await fetch(`/api/check-username-unique?username=${debouncedUsername}`)
+          const data = await response.json()
+          setUsernameMessage(data.message)
+        } catch (error) {
+          setUsernameMessage('Error checking username')
+        } finally {
+          setIsCheckingUsername(false)
+        }
+      }
+    }
+    checkUsernameUnique()
+  }, [debouncedUsername])
 
-    if (result?.error) {
-      setError('Invalid credentials');
+// In your handleSignIn function
+const handleSignIn = async (data: SignInFormData) => {
+  setError('');
+  const result = await signIn('credentials', {
+    redirect: false,
+    ...data,
+  });
+
+  if (result?.error) {
+    // Handle verification error specifically
+    if (result.error.includes('verify your email')) {
+      setError('Please verify your email before signing in. Check your email for the verification code.');
+      toast.error('Email Not Verified', {
+        description: 'Please verify your email before signing in.',
+      });
     } else {
-      const session = await getSession();
-      const role = session?.user?.role;
-      
-      if (role) {
-        router.push(`/${role}`);
-      } else {
-        router.push('/');
-      }
+      setError('Invalid credentials');
+      toast.error('Sign In Failed', {
+        description: 'Invalid email/username or password.',
+      });
     }
+  } else {
+    router.push(`/student`);
+  }
+}
+
+const handleSignUp = async (data: SignUpFormData) => {
+  // Check if username is available before submitting
+  if (usernameMessage !== 'Username is available') {
+    setTabError('Please choose an available username')
+    return
   }
 
-  const handleSignUp = async (data: SignUpFormData) => {
-    const session = await getSession();
-    const role = session?.user?.role || 'student';
-    try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, role: 'student' }),
-      })
+  try {
+    const response = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, role: 'student' }),
+    })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Sign up failed')
-      }
-
-      alert('Account created successfully')
-
-      // Auto-signin after successful registration
-      await signIn('credentials', {
-        redirect: false,
-        identifier: data.email,
-        password: data.password,
-      })
-      router.push(`/${role}`);
-    } catch (err: any) {
-      setTabError(err.message)
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Sign up failed')
     }
+
+    const result = await response.json();
+    
+    // Redirect to verification page instead of auto-signin
+    router.push(`/verify/${data.username}`);
+    
+  } catch (err: any) {
+    setTabError(err.message)
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -154,6 +186,8 @@ export default function AuthTabs() {
               setActiveTab(value as 'signin' | 'signup')
               setError('')
               setTabError('')
+              setUsernameMessage('')
+              setUsername('')
             }}
             className="w-full"
           >
@@ -315,13 +349,40 @@ export default function AuthTabs() {
                         </div>
                         <Input 
                           id="username" 
-                          className="pl-10 py-2 h-11"
-                          {...signUpForm.register('username')} 
+                          className="pl-10 pr-10 py-2 h-11"
+                          {...signUpForm.register('username')}
+                          onChange={(e) => {
+                            signUpForm.register('username').onChange(e);
+                            setUsername(e.target.value);
+                          }}
                         />
+                        {isCheckingUsername && (
+                          <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-gray-400" />
+                        )}
+                        {!isCheckingUsername && usernameMessage && (
+                          <div className="absolute right-3 top-3">
+                            {usernameMessage === 'Username is available' ? (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            ) : usernameMessage === 'Username is already taken' ? (
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            ) : null}
+                          </div>
+                        )}
                       </div>
                       {signUpForm.formState.errors.username && (
                         <p className="text-sm text-red-500">
                           {signUpForm.formState.errors.username.message}
+                        </p>
+                      )}
+                      {!isCheckingUsername && usernameMessage && (
+                        <p className={`text-sm ${
+                          usernameMessage === 'Username is available' 
+                            ? 'text-green-500' 
+                            : usernameMessage === 'Username is already taken'
+                            ? 'text-red-500'
+                            : 'text-gray-500'
+                        }`}>
+                          {usernameMessage}
                         </p>
                       )}
                     </div>
@@ -380,7 +441,7 @@ export default function AuthTabs() {
                     <Button
                       type="submit"
                       className="w-full h-11 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                      disabled={signUpForm.formState.isSubmitting}
+                      disabled={signUpForm.formState.isSubmitting || isCheckingUsername || (usernameMessage !== 'Username is available' && usernameMessage !== '')}
                     >
                       {signUpForm.formState.isSubmitting ? (
                         <div className="flex items-center justify-center">

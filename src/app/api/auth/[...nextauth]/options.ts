@@ -16,6 +16,7 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials: any): Promise<any> {
                 const { identifier, password } = credentials;
 
+                // Admin login (skip verification for admin)
                 const adminEmail = process.env.ADMIN_EMAIL;
                 const adminPassword = process.env.ADMIN_PASSWORD;
 
@@ -32,29 +33,35 @@ export const authOptions: NextAuthOptions = {
                         email: adminUser.email,
                         role: adminUser.role,
                         username: adminUser.username,
-                        category: null 
+                        category: null,
+                        isVerified: true // Admin is always verified
                     };
                 }
 
                 await dbConnect();
                 try {
-                   
+                    // Find user by email or username
                     const user = await User.findOne({
                         $or: [
                             { email: credentials.identifier },
                             { username: credentials.identifier }
                         ],
                     })
-                    .select('+password')
-                    .populate('category', 'name'); 
+                    .select('+password +isVerified') // Add isVerified to select
+                    .populate('category', 'name');
 
                     if (!user) {
-                        throw new Error('No user found');
+                        throw new Error('No user found with this email or username');
+                    }
+
+                    // Check if user is verified
+                    if (!user.isVerified) {
+                        throw new Error('Please verify your email before signing in. Check your email for the verification code.');
                     }
 
                     const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
                     if (!isPasswordCorrect) {
-                        throw new Error('Password incorrect');
+                        throw new Error('Password is incorrect');
                     }
 
                     return {
@@ -63,44 +70,49 @@ export const authOptions: NextAuthOptions = {
                         email: user.email,
                         username: user.username,
                         role: user.role,
-                        category: user.category // Include the populated category
+                        category: user.category,
+                        isVerified: user.isVerified
                     };
                 } catch (err: any) {
-                    throw new Error(err);
+                    throw new Error(err.message || 'Authentication failed');
                 }
             }
         })
     ],
-   callbacks: {
-  async jwt({ token, user }) {
-    if (user) {
-      token.sub = user._id?.toString?.() ?? user._id;
-      token._id = token.sub;
-      token.role = user.role;
-      token.username = user.username;
-      token.name = user.name ?? token.name;
-      token.email = user.email ?? token.email;
-      token.category = user.category
-        ? (typeof user.category === 'string' ? user.category : { _id: user.category._id?.toString?.() ?? user.category._id, name: user.category.name })
-        : null;
-    }
-    return token;
-  },
-  async session({ session, token }) {
-    if (token) {
-      session.user = {
-        _id: token.sub,
-        role: token.role,
-        username: token.username,
-        name: token.name,
-        email: token.email,
-        category: token.category ?? null
-      };
-    }
-    return session;
-  },
-},
-
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.sub = user._id?.toString?.() ?? user._id;
+                token._id = token.sub;
+                token.role = user.role;
+                token.username = user.username;
+                token.name = user.name ?? token.name;
+                token.email = user.email ?? token.email;
+                token.category = user.category
+                    ? (typeof user.category === 'string' ? user.category : { 
+                        _id: user.category._id?.toString?.() ?? user.category._id, 
+                        name: user.category.name 
+                    })
+                    : null;
+                token.isVerified = user.isVerified; 
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token) {
+                session.user = {
+                    _id: token.sub,
+                    role: token.role,
+                    username: token.username,
+                    name: token.name,
+                    email: token.email,
+                    category: token.category ?? null,
+                    isVerified: token.isVerified // Add verification status to session
+                };
+            }
+            return session;
+        },
+    },
     session: {
         strategy: 'jwt',
     },

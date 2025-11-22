@@ -20,15 +20,24 @@ const UserSchema = new mongoose.Schema({
     required: function() {
       return this.role === 'teacher';
     }
+  },
+  // ADD THESE NEW FIELDS FOR OTP VERIFICATION
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verifyCode: {
+    type: String,
+  },
+  verifyCodeExpiry: {
+    type: Date,
   }
 }, { timestamps: true });
 
-
 UserSchema.index({ username: 1, email: 1 }, { unique: true });
-
 UserSchema.index({ role: 1 });
 
-
+// KEEP your existing password hashing middleware
 UserSchema.pre("save", async function(next) {
   if (!this.isModified("password")) return next();
   try {
@@ -40,10 +49,9 @@ UserSchema.pre("save", async function(next) {
   }
 });
 
-
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-
+// UPDATE the admin creation function to mark admin as verified
 async function createAdminUser() {
   await dbConnect();
   const existing = await User.findOne({ role: "admin" });
@@ -55,7 +63,10 @@ async function createAdminUser() {
       password: process.env.ADMIN_PASSWORD,
       name: "System Admin",
       role: "admin",
-      phoneNumber: ""
+      phoneNumber: "",
+      isVerified: true, 
+      verifyCode: undefined,
+      verifyCodeExpiry: undefined
     });
     
     console.log("✅ Admin user created with ID:", admin._id);
